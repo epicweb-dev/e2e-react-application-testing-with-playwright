@@ -1,0 +1,98 @@
+{
+  "files": [],
+  "exclude": [
+    "node_modules"
+  ],
+  "references": [
+    {
+      "path": "exercises/01.setup/01.problem.vscode-extension"
+    },
+    {
+      "path": "exercises/01.setup/01.solution.vscode-extension"
+    },
+    {
+      "path": "exercises/01.setup/02.problem.multiple-workspaces"
+    },
+    {
+      "path": "exercises/01.setup/02.solution.multiple-workspaces"
+    },
+    {
+      "path": "exercises/01.setup/03.problem.code-coverage"
+    },
+    {
+      "path": "exercises/01.setup/03.solution.code-coverage"
+    },
+    {
+      "path": "exercises/02.context/01.problem.custom-fixtures"
+    },
+    {
+      "path": "exercises/02.context/01.solution.custom-fixtures"
+    },
+    {
+      "path": "exercises/02.context/02.problem.automatic-fixtures"
+    },
+    {
+      "path": "exercises/02.context/02.solution.automatic-fixtures"
+    },
+    {
+      "path": "exercises/02.context/03.problem.global-context"
+    },
+    {
+      "path": "exercises/02.context/03.solution.global-context"
+    },
+    {
+      "path": "exercises/03.assertions/01.problem.custom-matchers"
+    },
+    {
+      "path": "exercises/03.assertions/01.solution.custom-matchers"
+    },
+    {
+      "path": "exercises/03.assertions/02.problem.asymmetric-matchers"
+    },
+    {
+      "path": "exercises/03.assertions/02.solution.asymmetric-matchers"
+    },
+    {
+      "path": "exercises/03.assertions/03.problem.custom-quality-testers"
+    },
+    {
+      "path": "exercises/03.assertions/03.solution.custom-equality-testers"
+    },
+    {
+      "path": "exercises/03.assertions/04.problem.retryable-assertions"
+    },
+    {
+      "path": "exercises/03.assertions/04.solution.retryable-assertions"
+    },
+    {
+      "path": "exercises/03.assertions/05.problem.soft-assertions"
+    },
+    {
+      "path": "exercises/03.assertions/05.solution.soft-assertions"
+    },
+    {
+      "path": "exercises/04.performance/01.problem.profiling-slow-tests"
+    },
+    {
+      "path": "exercises/04.performance/01.solution.profiling-slow-tests"
+    },
+    {
+      "path": "exercises/04.performance/02.problem.concurrency"
+    },
+    {
+      "path": "exercises/04.performance/02.solution.concurrency"
+    },
+    {
+      "path": "exercises/04.performance/03.problem.test-isolation"
+    },
+    {
+      "path": "exercises/04.performance/03.solution.test-isolation"
+    },
+    {
+      "path": "exercises/04.performance/04.problem.sharding"
+    },
+    {
+      "path": "exercises/04.performance/04.solution.sharding"
+    }
+  ]
+}

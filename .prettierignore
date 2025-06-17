@@ -1,0 +1,8 @@
+**/node_modules/**
+**/.cache/**
+**/build/**
+**/dist/**
+**/public/**
+**/package-lock.json
+**/playwright-report/**
+**/.github/workflows/ci.yml
