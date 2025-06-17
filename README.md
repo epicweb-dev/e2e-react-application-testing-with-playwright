@@ -1,5 +1,5 @@
 <div align="center">
-  <h1><a href="https://www.epicweb.dev/workshops">End-to-end React Application Testing with Playwright</a></h1>
+  <h1><a href="https://www.epicweb.dev/workshops">End-to-End React Application Testing with Playwright</a></h1>
   <strong>
   </strong>
 </div>

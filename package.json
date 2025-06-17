@@ -2,7 +2,7 @@
   "name": "e2e-react-application-testing-with-playwright",
   "private": true,
   "epicshop": {
-    "title": "End-to-end React Application Testing with Playwright",
+    "title": "E2E React Application Testing with Playwright",
     "subtitle": "Become Vitest superuser",
     "githubRepo": "https://github.com/epicweb-dev/e2e-react-application-testing-with-playwright",
     "instructor": {
