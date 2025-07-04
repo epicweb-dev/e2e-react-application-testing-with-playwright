@@ -16,3 +16,4 @@ test-profiles
 coverage
 .vitest-reports
 *.DS_Store
+**/playwright/.auth
