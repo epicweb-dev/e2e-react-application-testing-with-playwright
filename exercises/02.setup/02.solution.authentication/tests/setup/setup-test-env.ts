@@ -5,10 +5,8 @@ import '#app/utils/env.server.ts'
 
 import { cleanup } from '@testing-library/react'
 import { afterEach, beforeEach, vi, type MockInstance } from 'vitest'
-import { server } from '#tests/mocks/index.ts'
 import './custom-matchers.ts'
 
-afterEach(() => server.resetHandlers())
 afterEach(() => cleanup())
 
 export let consoleError: MockInstance<(typeof console)['error']>
