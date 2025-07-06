@@ -1,0 +1,9 @@
+# Mock databases
+
+**This exercise MUST preceed the Authentication exercise** because we are using Prisma to create test users for authentication purposes. Without this setup, it will try creating real users in the real database.
+
+- **Set up mock databases _per test_.** `testInfo.testId` to the rescue! But then it's not environment variable-driven so be cautious.
+
+1. Create `.env.test` and load it in Playwright.
+1. Set `DATABASE_URL` environment variable to point to `./prisma.data.db`.
+1. Show how that datbase after the test run (see the created user).

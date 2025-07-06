@@ -1,0 +1,5 @@
+# Fixtures
+
+- Implement a custom `navigate()` fixture, which is a type-safe version of `page.goto()`.
+- Use `.react-router/types/+routes.ts` to infer known routes and their required path parameters.
+- Refactor the existing `tests/e2e/homepage.test.ts` to use `navigate()` instead of `page.goto('/')`. Illustrate that TS now suggests routes to go to right in the test.

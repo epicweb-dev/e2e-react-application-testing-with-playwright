@@ -1,0 +1,60 @@
+import { createNetworkFixture, type NetworkFixture } from '@msw/playwright'
+import { test as testBase, expect } from '@playwright/test'
+import { http } from 'msw'
+import {
+	definePersona,
+	combinePersonas,
+	type AuthenticateFunction,
+} from 'playwright-persona'
+import { getPasswordHash } from '#app/utils/auth.server.ts'
+import { prisma } from '#app/utils/db.server.ts'
+import { createUser } from '#tests/db-utils'
+
+const user = definePersona('user', {
+	async createSession({ page }) {
+		const user = await prisma.user.create({
+			data: {
+				...createUser(),
+				roles: { connect: { name: 'user' } },
+				password: { create: { hash: await getPasswordHash('supersecret') } },
+			},
+		})
+
+		await page.goto('/login')
+		await page.getByLabel('Username').fill(user.username)
+		await page.getByLabel('Password').fill('supersecret')
+		await page.getByRole('button', { name: 'Log in' }).click()
+		await page.getByText(user.name!).waitFor({ state: 'visible' })
+
+		return { user }
+	},
+	async verifySession({ page, session }) {
+		await page.goto('/')
+		await page.getByText(session.user.name!).isVisible()
+	},
+	async destroySession({ session }) {
+		await prisma.user.deleteMany({ where: { id: session.user.id } })
+	},
+})
+
+export const test = testBase.extend<{
+	authenticate: AuthenticateFunction<[typeof user]>
+	network: NetworkFixture
+}>({
+	authenticate: combinePersonas(user),
+	network: createNetworkFixture({
+		initialHandlers: [
+			http.all('*', ({ request }) => {
+				console.log(request.method, request.url)
+			}),
+			// http.post(
+			// 	'https://api.github.com/login/oauth/access_token',
+			// 	async ({ request }) => {
+			// 		console.warn('GITHUB LOGIN!')
+			// 	},
+			// ),
+		],
+	}),
+})
+
+export { expect }

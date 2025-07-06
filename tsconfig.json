@@ -5,28 +5,28 @@
   ],
   "references": [
     {
-      "path": "exercises/01.basics/01.solution.install"
+      "path": "exercises/01.basics/01.solution.getting-started"
     },
     {
-      "path": "exercises/01.basics/02.solution.your-first-test"
+      "path": "exercises/01.basics/02.solution.running-the-app"
     },
     {
-      "path": "exercises/02.setup/01.solution.fixtures"
+      "path": "exercises/02.test-setup/01.solution.fixtures"
     },
     {
-      "path": "exercises/02.setup/02.problem.authentication"
+      "path": "exercises/02.test-setup/02.solution.mock-databases"
     },
     {
-      "path": "exercises/02.setup/02.solution.authentication"
+      "path": "exercises/02.test-setup/03.problem.authentication"
     },
     {
-      "path": "exercises/02.setup/03.solution.mock-databases"
+      "path": "exercises/02.test-setup/03.solution.authentication"
     },
     {
-      "path": "exercises/02.setup/04.solution.api-mocking"
+      "path": "exercises/02.test-setup/04.solution.api-mocking"
     },
     {
-      "path": "exercises/02.setup/05.solution.test-data"
+      "path": "exercises/02.test-setup/05.solution.test-data"
     },
     {
       "path": "exercises/03.guides/01.solution.recording-interactions"
@@ -41,10 +41,10 @@
       "path": "exercises/04.debugging/01.solution.ui-mode"
     },
     {
-      "path": "exercises/04.debugging/02.solution.breakpoints"
+      "path": "exercises/04.debugging/02.solution.trace-viewer"
     },
     {
-      "path": "exercises/04.debugging/03.solution.trace-viewer"
+      "path": "exercises/04.debugging/03.solution.live-debugging"
     }
   ]
 }
