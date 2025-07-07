@@ -13,6 +13,7 @@ data.db
 __screenshots__
 *.sqlite
 test-profiles
+test-results
 coverage
 .vitest-reports
 *.DS_Store

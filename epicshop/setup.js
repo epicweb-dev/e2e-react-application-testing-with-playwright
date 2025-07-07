@@ -34,19 +34,6 @@ if (major < 8 || (major === 8 && minor < 16)) {
 	throw new Error('npm version is out of date')
 }
 
-// Generate test suites for exercises.
-{
-	const result = spawnSync('node ./generate-tests.js', {
-		cwd: new URL('.', import.meta.url),
-		stdio: 'inherit',
-		shell: true,
-	})
-
-	if (result.status !== 0) {
-		process.exit(result.status)
-	}
-}
-
 {
 	const command =
 		'npx --yes "https://gist.github.com/kentcdodds/bb452ffe53a5caa3600197e1d8005733" -q'

@@ -1,0 +1,48 @@
+# Install & configure
+
+## Your task
+
+In this first exercise, your task is to install and configure Playwright from scratch and write a simple end-to-end test. Follow 🐨 Kody who will guide you through the steps you need to complete.
+
+🐨 First, install [`@playwright/test`](https://npmjs.com/package/@playwright/test) as a dependency in your project:
+
+```sh
+npm i @playwright/test --save-dev
+```
+
+🐨 Then, install the binaries of the browsers you want to use for automated tests. In this workshop, we will be using Chromium for browser automation. Install it using this command:
+
+```sh
+npx playwright install --with-deps chromium
+```
+
+🐨 Next, create `playwright.config.ts` file at the root of your project. This is Playwright's configuration file. You will use it to set up Playwright in the way that makes sense for your project.
+
+🐨 In `package.json`, create a new script called `test:e2e`. You will use this script to run your end-to-end tests at the end of this exercise. Use the `playwright test` command as the value for that script.
+
+🐨 Create a directory called `tests`. In that directory, create a new test file called `epicweb.test.ts`.
+
+🐨 In the `epicweb.test.ts` file, write a single test case called "displays the page heading".
+
+```ts
+import { test, expect } from '@playwright/test'
+
+test('test title', async ({ page }) => {
+	// ...test steps here.
+})
+```
+
+The purpose of this test will be to verify that a this heading is displayed at the Epic Web's homepage.
+
+![](/assets/01-01-epicweb-heading.png)
+
+To do that, your test would have to perform a series of steps:
+
+1. Navigate to `https://epicweb.dev/` using the `page.goto()` function (pay attention that it returns a promise!).
+1. Find the heading on the page by its _role_ and _accessible name_ using the `page.getByRole(role, { name })` function.
+
+> If you are unsure where to find element's role and accessible name, open your DevTools, head to the "Elements" tab, and select the "Accessibility" nested tab to the right (in the same tab list as "Styles" and "Computed"). Select the element on the page and see its accessible attributes, including its role and accessible name.
+
+3. Assert that the heading element is visible on the page via `await expect(element).toBeVisible()`.
+
+🐨 Finally, run this test via `npm run test:e2e` in the terminal. You should see it passing.

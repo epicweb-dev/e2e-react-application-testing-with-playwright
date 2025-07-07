@@ -5,7 +5,10 @@
   ],
   "references": [
     {
-      "path": "exercises/01.basics/01.solution.getting-started"
+      "path": "exercises/01.basics/01.problem.install-and-configure"
+    },
+    {
+      "path": "exercises/01.basics/01.solution.install-and-configure"
     },
     {
       "path": "exercises/01.basics/02.problem.running-the-app"
