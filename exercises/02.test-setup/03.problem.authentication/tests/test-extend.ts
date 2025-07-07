@@ -3,9 +3,22 @@ import { test as testBase, expect } from '@playwright/test'
 // from the `playwright-persona` package
 // 💰 import { one, two, three } from 'playwright-persona'
 
+import { href, type Register } from 'react-router'
 import { getPasswordHash } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 import { createUser } from '#tests/db-utils'
+
+interface Fixtures {
+	navigate: <T extends keyof Register['pages']>(
+		...args: Parameters<typeof href<T>>
+	) => Promise<void>
+
+	// 🐨 Annotate the custom authentication fixture by defining a key
+	// called "authenticate" and its type as "AuthenticateFunction" type
+	// you've imported earlier. Provide the list of persona types as the type
+	// argument to the "AuthenticateFunction" type.
+	// 💰 authenticate: AuthenticateFunction<[typeof personaOne, typeof personaTwo]>
+}
 
 // 🐨 Declare a new variable called `user` and assign it the result of
 // calling the `definePersona` function.
@@ -78,13 +91,13 @@ import { createUser } from '#tests/db-utils'
 // 💰 await destroySession({ session }) {}
 // 💰 await prisma.user.deleteMany({ where: { id: session.user.id } })
 
-export const test = testBase.extend<{
-	// 🐨 Annotate the custom authentication fixture by defining a key
-	// called "authenticate" and its type as "AuthenticateFunction" type
-	// you've imported earlier. Provide the list of persona types as the type
-	// argument to the "AuthenticateFunction" type.
-	// 💰 authenticate: AuthenticateFunction<[typeof personaOne, typeof personaTwo]>
-}>({
+export const test = testBase.extend<Fixtures>({
+	async navigate({ page }, use) {
+		await use(async (...args) => {
+			await page.goto(href(...args))
+		})
+	},
+
 	// 🐨 Declare a new fixture called "authenticate".
 	// As the value of this fixture, provide it the result of calling
 	// the "combinePersonas" function you've imported earlier.

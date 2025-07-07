@@ -15,8 +15,8 @@ test('creates a new note', async ({
 	//
 	// 🐨 Navigate to the new note route in the app.
 	// Reference the username from the authenticated "user" object.
-	// 💰 `/users/${username}/notes/new`
-	// 💰 await page.goto(ROUTE)
+	// 💰 `/users/:username/notes/new`
+	// 💰 await navigate(ROUTE, PARAMS)
 	//
 	// 🐨 Interact with the "New note" form to fill in the note's title and content.
 	// 💰 await page.getByLabel('Title').fill(NOTE_TITLE)

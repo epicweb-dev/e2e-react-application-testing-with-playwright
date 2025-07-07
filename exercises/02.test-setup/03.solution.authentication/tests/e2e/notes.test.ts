@@ -1,9 +1,9 @@
 import { test, expect } from '#tests/test-extend.ts'
 
-test('creates a new note', async ({ authenticate, page }) => {
+test('creates a new note', async ({ navigate, authenticate, page }) => {
 	const { user } = await authenticate({ as: 'user' })
 
-	await page.goto(`/users/${user.username}/notes/new`)
+	await navigate('/users/:username/notes/new', { username: user.username })
 
 	await page.getByLabel('Title').fill('My new note')
 	await page.getByLabel('Content').fill('Hello world')
