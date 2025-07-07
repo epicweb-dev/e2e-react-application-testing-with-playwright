@@ -1,37 +1,17 @@
 import { test as testBase, expect } from '@playwright/test'
-import { type Register, generatePath } from 'react-router'
-
-type Pages = Register['pages']
-
-type Routes<P extends Record<string, any>> = {
-	[K in keyof P]: K & string
-}[keyof P] & {}
-
-type Params<
-	R extends string,
-	Pages extends Record<string, any>,
-> = keyof Pages[R]['params'] extends never ? never : Pages[R]['params']
+import { href, type Register } from 'react-router'
 
 interface Fixtures {
-	navigate: <R extends Routes<Pages>>(
-		...args: [Params<R, Pages>] extends [never]
-			? [route: R, params?: never]
-			: [route: R, params: Params<R, Pages>]
+	navigate: <T extends keyof Register['pages']>(
+		...args: Parameters<typeof href<T>>
 	) => Promise<void>
 }
 
 export const test = testBase.extend<Fixtures>({
 	async navigate({ page }, use) {
-		await use(
-			async (
-				...args:
-					| [route: string, route?: never]
-					| [route: string, params: Record<string, any>]
-			) => {
-				const [route, params] = args
-				await page.goto(generatePath(route, params))
-			},
-		)
+		await use(async (...args) => {
+			await page.goto(href(...args))
+		})
 	},
 })
 
