@@ -11,7 +11,10 @@
       "path": "exercises/01.basics/02.solution.running-the-app"
     },
     {
-      "path": "exercises/02.test-setup/01.solution.fixtures"
+      "path": "exercises/02.test-setup/01.problem.custom-fixtures"
+    },
+    {
+      "path": "exercises/02.test-setup/01.solution.custom-fixtures"
     },
     {
       "path": "exercises/02.test-setup/02.solution.mock-databases"
