@@ -13,7 +13,6 @@ interface Fixtures {
 	navigate: <T extends keyof Register['pages']>(
 		...args: Parameters<typeof href<T>>
 	) => Promise<void>
-
 	authenticate: AuthenticateFunction<[typeof user]>
 }
 

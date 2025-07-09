@@ -8,13 +8,19 @@ import {
 	type FieldMetadata,
 } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
+import { useQuery } from '@tanstack/react-query'
 import { Img } from 'openimg/react'
 import { useState } from 'react'
 import { Form } from 'react-router'
 import { z } from 'zod'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import { floatingToolbarClassName } from '#app/components/floating-toolbar.tsx'
-import { ErrorList, Field, TextareaField } from '#app/components/forms.tsx'
+import {
+	ComboboxField,
+	ErrorList,
+	Field,
+	TextareaField,
+} from '#app/components/forms.tsx'
 import { Button } from '#app/components/ui/button.tsx'
 import { Icon } from '#app/components/ui/icon.tsx'
 import { Label } from '#app/components/ui/label.tsx'
@@ -48,7 +54,15 @@ export const NoteEditorSchema = z.object({
 	title: z.string().min(titleMinLength).max(titleMaxLength),
 	content: z.string().min(contentMinLength).max(contentMaxLength),
 	images: z.array(ImageFieldsetSchema).max(5).optional(),
+	location: z.string().optional(),
 })
+
+export type GoogleFindPlaceApiResponse = {
+	candidates: Array<{
+		place_id: string
+		formatted_address: string
+	}>
+}
 
 export function NoteEditor({
 	note,
@@ -73,6 +87,28 @@ export function NoteEditor({
 		shouldRevalidate: 'onBlur',
 	})
 	const imageList = fields.images.getFieldList()
+
+	const { data: locationSuggestions } = useQuery<
+		GoogleFindPlaceApiResponse | undefined
+	>({
+		queryKey: ['location-suggestions'],
+		queryFn: async ({ signal }) => {
+			await new Promise((resolve) => setTimeout(resolve, 300))
+
+			if (!signal.aborted && fields.location.value) {
+				const url = new URL(
+					'https://maps.googleapis.com/maps/api/place/findplacefromtext/json',
+				)
+				url.searchParams.set('key', 'FOO')
+				url.searchParams.set('input', fields.location.value)
+				url.searchParams.set('inputtype', 'textquery')
+				url.searchParams.set('fields', 'place_id,formatted_address')
+				const response = await fetch(url)
+				return response.json() as Promise<GoogleFindPlaceApiResponse>
+			}
+		},
+		enabled: !!fields.location.value,
+	})
 
 	return (
 		<div className="absolute inset-0">
@@ -105,6 +141,20 @@ export function NoteEditor({
 								...getTextareaProps(fields.content),
 							}}
 							errors={fields.content.errors}
+						/>
+						<ComboboxField
+							options={
+								locationSuggestions?.candidates.map((candidate) => ({
+									label: candidate.formatted_address,
+									value: candidate.formatted_address,
+								})) || []
+							}
+							labelProps={{ children: 'Location' }}
+							inputProps={{
+								...getInputProps(fields.location, { type: 'text' }),
+								placeholder: 'Select a location...',
+							}}
+							errors={fields.location.errors}
 						/>
 						<div>
 							<Label>Images</Label>

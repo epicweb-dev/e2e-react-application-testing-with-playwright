@@ -1,6 +1,6 @@
 import { useInputControl } from '@conform-to/react'
 import { REGEXP_ONLY_DIGITS_AND_CHARS, type OTPInputProps } from 'input-otp'
-import React, { useId } from 'react'
+import React, { useEffect, useId, useState } from 'react'
 import { Checkbox, type CheckboxProps } from './ui/checkbox.tsx'
 import {
 	InputOTP,
@@ -11,6 +11,8 @@ import {
 import { Input } from './ui/input.tsx'
 import { Label } from './ui/label.tsx'
 import { Textarea } from './ui/textarea.tsx'
+import { cn } from '#app/utils/misc.tsx'
+import { Command, CommandItem, CommandList } from './ui/command.tsx'
 
 export type ListOfErrors = Array<string | null | undefined> | null | undefined
 
@@ -194,6 +196,89 @@ export function CheckboxField({
 					className="text-body-xs text-muted-foreground self-center"
 				/>
 			</div>
+			<div className="px-4 pt-1 pb-3">
+				{errorId ? <ErrorList id={errorId} errors={errors} /> : null}
+			</div>
+		</div>
+	)
+}
+
+export function ComboboxField({
+	labelProps,
+	inputProps,
+	errors,
+	options,
+	className,
+}: {
+	labelProps: React.LabelHTMLAttributes<HTMLLabelElement>
+	inputProps: React.TextareaHTMLAttributes<HTMLInputElement> & { key: any }
+	errors?: ListOfErrors
+	options: Array<{ label: string; value: string }>
+	className?: string
+}) {
+	const fallbackId = useId()
+	const id = inputProps.id ?? fallbackId
+	const control = useInputControl({
+		key: inputProps.key,
+		name: inputProps.name!,
+		formId: inputProps.form!,
+	})
+	const errorId = errors?.length ? `${id}-error` : undefined
+
+	const [query, setQuery] = useState<string>()
+	const [filtered, setFiltered] = useState<
+		Array<{ label: string; value: string }>
+	>([])
+
+	useEffect(() => {
+		setFiltered(
+			query && query.length > 2
+				? options.filter((option) => {
+						return (
+							option.value.toLowerCase().includes(query.toLowerCase()) ||
+							option.label.toLowerCase().includes(query.toLowerCase())
+						)
+					})
+				: [],
+		)
+	}, [query, options])
+
+	return (
+		<div className={cn('relative', className)}>
+			<Label htmlFor={id} {...labelProps} />
+			<Input
+				{...inputProps}
+				aria-invalid={errorId ? true : undefined}
+				aria-describedby={errorId}
+				autoComplete="off"
+				value={query || ''}
+				onChange={(event) => {
+					setQuery(event.target.value)
+				}}
+			/>
+
+			{filtered.length > 0 && (
+				<div className="bg-popover text-popover-foreground border-muted-foreground/60 absolute z-10 mt-1 w-full rounded-md border shadow">
+					<Command>
+						<CommandList>
+							{filtered.map((option) => (
+								<CommandItem
+									key={option.value}
+									value={option.value}
+									onSelect={() => {
+										control.change(option.value)
+										setQuery(option.value)
+										setFiltered([])
+									}}
+								>
+									{option.label}
+								</CommandItem>
+							))}
+						</CommandList>
+					</Command>
+				</div>
+			)}
+
 			<div className="px-4 pt-1 pb-3">
 				{errorId ? <ErrorList id={errorId} errors={errors} /> : null}
 			</div>

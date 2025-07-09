@@ -3,8 +3,6 @@ import 'dotenv/config'
 
 const PORT = process.env.PORT || '3000'
 
-const MOCK_PORT = await getRandomPort()
-
 export default defineConfig({
 	testDir: './tests/e2e',
 	timeout: 15 * 1000,
@@ -39,8 +37,6 @@ export default defineConfig({
 		env: {
 			PORT,
 			NODE_ENV: 'test',
-			// Provide remote env from "msw/node".
-			...getRemoteEnvironment(),
 		},
 	},
 })
