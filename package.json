@@ -3,7 +3,7 @@
   "private": true,
   "epicshop": {
     "title": "E2E React Application Testing with Playwright",
-    "subtitle": "Become Vitest superuser",
+    "subtitle": "Test React applications end-to-end",
     "githubRepo": "https://github.com/epicweb-dev/e2e-react-application-testing-with-playwright",
     "instructor": {
       "name": "Artem Zakharchenko",
