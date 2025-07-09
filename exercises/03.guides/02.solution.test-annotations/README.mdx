@@ -5,6 +5,26 @@ Goal: Enhance test failures so you are one click away from learning more about t
 - `tag` (let's group user-related tests);
 - `annotation.type` + `annotation.description` (let's provide metadata about the test case).
 
+Things you can do with tags:
+
+1. Run a subset of tests:
+
+````sh
+npm run test:e2e -- --grep=@user
+npm run test:e2e -- --grep=@user|@profile
+``
+
+2. You can also filter and run subset of tests from the UI mode (the "Filter" input at the top left).
+2. You can filter the test results in the test report (`show-report`) by tags.
+
+Things you can do with annotations:
+
+```sh
+npx playwright show-report
+# And then click on the failing test.
+# Custom annotataions will list extra info to help you debug.
+````
+
 ## Related materials
 
 - [Test annotations](https://playwright.dev/docs/test-annotations)

@@ -1,0 +1,88 @@
+# Test annotations
+
+## Your task
+
+👨‍💼 In this one, your task is to use [Annotations](https://playwright.dev/docs/test-annotations) in Playwright to improve the developer experience of your test suite. You will focus on two types of annotations today: _tags_ and _custom annotations_. Please follow the steps below.
+
+### Tags
+
+Let's start with the tags. You can add a tag to any test case by providing a test details object as the second argument of your test case (after the test name but before the test callback) and specifying the `tag` property in that object:
+
+```ts highlight=3-5
+test(
+	'displays a user greeting',
+	{
+		tag: ['@user'],
+	},
+	async ({ page }) => {},
+)
+```
+
+🐨 Equipped with this knowledge, head to the following test cases and mark them with their respective tags:
+
+| Test file                                                                                         | Test case                               | Tags                |
+| ------------------------------------------------------------------------------------------------- | --------------------------------------- | ------------------- |
+| <InlineFile file="./tests/e2e/homepage.test.ts">`tests/e2e/homepage.test.ts`</InlineFile>         | "creates a new note"                    | `@homepage`         |
+| <InlineFile file="./tests/e2e/notes-create.test.ts">`tests/e2e/notes-create.test.ts`</InlineFile> | "creates a new note"                    | `@user`, `@notes`   |
+| <InlineFile file="./tests/e2e/profile-edit.test.ts">`tests/e2e/profile-edit.test.ts`</InlineFile> | "displays the user profile page"        | `@user`, `@profile` |
+| <InlineFile file="./tests/e2e/profile-edit.test.ts">`tests/e2e/profile-edit.test.ts`</InlineFile> | "saves changes to the name of the user" | `@user`, `@profile` |
+
+<callout-warning>Note that tags in Playwright _must_ begin with an at sign "@" (e.g. `@user`, `@dashboard`, etc).</callout-warning>
+
+🐨 Once you've marked those tests with their tags, try running a subset of your test suite based on a tag. For example, to run only the test cases realted to the user profile, include its tag `@profile` as the value of the `--grep` option of Playwright's CLI:
+
+```sh
+npx playwright test --grep=@profile
+```
+
+<callout-success>You can use tags to filter out tests and test reports as well. Explore them in the UI mode as well as in the test report (`npx playwright show-report`).</callout-success>
+
+### Custom annotations
+
+Now, it's time for you to improve the failure experience of your tests. One of the ways to do that is by including additional data next to individual test cases. That data is referred to as "annotations" in Playwright. Each annotation allows you to define its `type` and `description`, and is defined in the test details object as well:
+
+```ts highlight=3-8
+test(
+	'displays a user greeting',
+	{
+		annotation: {
+			type: 'issue',
+			description: 'https://epicweb.dev/',
+		},
+	},
+	async ({ page }) => {},
+)
+```
+
+Let's use annotations in action!
+
+🐨 First, run the test cases for the homepage, using the `@homepage` tag you've defined earlier. Once you do that, you will see a test case failing:
+
+```
+Error: Timed out 5000ms waiting for expect(locator).toBeVisible()
+
+Locator: getByRole('heading', { name: 'The Most Epic of Stacks' })
+Expected: visible
+Received: <element(s) not found>
+Call log:
+  - Expect "toBeVisible" with timeout 5000ms
+  - waiting for getByRole('heading', { name: 'The Most Epic of Stacks' })
+
+
+   6 | 	await expect(
+   7 | 		page.getByRole('heading', { name: 'The Most Epic of Stacks' }),
+>  8 | 	).toBeVisible()
+     | 	  ^
+   9 | })
+  10 |
+```
+
+It looks like it cannot find the given element on the page! Actually, I think I've had this issue before. Yeah, definitely, there's even a [GitHub issue about it](https://github.com/epicweb-dev/epic-stack/issues/1020).
+
+🐨 Before you fix the problem, annotate this failing test, providing `issue` as the annotation's type and the GitHub issue URL I've linked above as the annotation's description.
+
+<callout-success>Annotating your tests helps you (and your colleagues) debug and fix them faster when they fail. The more context you have on the issue, the more efficient you are as a developer.</callout-success>
+
+🐨 Try re-running the same test again. If you preview the test report via `npx playwright show-report`, you will now spot your custom annotation right above the test result!
+
+🐨 Read through the [GitHub issue](https://github.com/epicweb-dev/epic-stack/issues/1020) and see if you can find any recommendations on how to fix this failing test. Once you do, fix it and have it passing again.
