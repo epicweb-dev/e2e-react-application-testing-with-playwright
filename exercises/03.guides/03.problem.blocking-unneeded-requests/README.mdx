@@ -1,0 +1,17 @@
+# Blocking unneeded requests
+
+## Your task
+
+👨‍💼 In this one, your task is to block a certain HTTP request fired by the app. I'm talking about this analytics script:
+
+```jsx
+<script
+	nonce={nonce}
+	defer
+	src="https://assets.onedollarstats.com/stonks.js"
+></script>
+```
+
+🐨 Go to the <InlineFile name="./tests/test-extend.ts">`tests/test-extend.ts`</InlineFile> file and follow the instructions to intercept the problematic request and handle its response.
+
+🐨 Once you do, run the tests via the `npm run test:e2e:dev` command. Inspect the "Network" tab in Playwright's UI mode that find the request that you have intercepted. It should have an empty response.
