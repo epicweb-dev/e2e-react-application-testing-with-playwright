@@ -13,7 +13,7 @@ test(
 		await navigate('/')
 
 		await expect(
-			page.getByRole('heading', { name: 'The Most Epic of Stacks' }),
+			page.getByRole('heading', { name: 'The Epic Stack' }),
 		).toBeVisible()
 	},
 )
