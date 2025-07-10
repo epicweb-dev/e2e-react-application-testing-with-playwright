@@ -50,10 +50,16 @@
       "path": "exercises/03.guides/02.solution.test-annotations"
     },
     {
+      "path": "exercises/03.guides/03.problem.blocking-unneeded-requests"
+    },
+    {
       "path": "exercises/03.guides/03.solution.blocking-unneeded-requests"
     },
     {
       "path": "exercises/04.debugging/01.solution.ui-mode"
+    },
+    {
+      "path": "exercises/04.debugging/02.problem.trace-viewer"
     },
     {
       "path": "exercises/04.debugging/02.solution.trace-viewer"
