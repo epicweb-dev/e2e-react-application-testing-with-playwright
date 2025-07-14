@@ -15,11 +15,11 @@ test('displays location suggestions when creating a new note', async ({
 				return HttpResponse.json({
 					candidates: [
 						{
-							place_id: crypto.randomUUID(),
+							place_id: 'f02cda9e-d6d0-437b-9f82-1c5652e12af2',
 							formatted_address: 'San Francisco',
 						},
 						{
-							place_id: crypto.randomUUID(),
+							place_id: '77886276-dc77-4399-a39e-037378ac4c34',
 							formatted_address: 'San Jose',
 						},
 					],
@@ -35,7 +35,8 @@ test('displays location suggestions when creating a new note', async ({
 	await page.getByLabel('Content').fill('Hello world')
 
 	const locationInput = page.getByLabel('Location')
-	await locationInput.pressSequentially('San', { delay: 150 })
+
+	await locationInput.fill('San')
 	await expect(page.getByRole('option')).toHaveText([
 		'San Francisco',
 		'San Jose',

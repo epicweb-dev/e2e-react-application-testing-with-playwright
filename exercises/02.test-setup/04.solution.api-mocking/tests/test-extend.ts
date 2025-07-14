@@ -52,9 +52,7 @@ export const test = testBase.extend<Fixtures>({
 		})
 	},
 	authenticate: combinePersonas(user),
-	network: createNetworkFixture({
-		initialHandlers: [],
-	}),
+	network: createNetworkFixture(),
 })
 
 export { expect }

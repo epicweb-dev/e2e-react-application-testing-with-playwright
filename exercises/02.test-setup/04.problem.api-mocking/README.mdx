@@ -1,0 +1,17 @@
+# API mocking
+
+## Your task
+
+👨‍💼 In this exercise, I've refactored our application to use the Google Places API to improve the user experience when creating new notes. See, the user can now provide a note's location when creating it! But that introduces a problem... That request will now happen in tests, too! That won't do. Your task is to solve this by using [Mock Service Worker](https://mswjs.io) and its [`@msw/playwright`](https://github.com/mswjs/playwright) package.
+
+🐨 Start by adding `msw` and `@msw/playwright` packages as dependencies:
+
+```sh
+npm i msw @msw/playwright --save-dev
+```
+
+🐨 Next, head to the <InlineFile file="./tests/e2e/test-extend.ts">`tests/e2e/test-extend.ts`</InlineFile>. I've prepared a few instructions for you to help you implement a new fixture called `network`. As the name suggests, you're going to be using it to control the state of network in your end-to-end tests!
+
+🐨 Once you've got the `network` fixture ready, it's time to put it into action. In the <InlineFile file="./tests/e2e/notes-created.test.ts">`tests/e2e/notes-created.test.ts`</InlineFile> test file, complete the test case for a new note creation. In this one, you'd have to intercept an HTTP request to the Google Places API that happens on the client to suggest a list of places for the note's "Location" field. As always, 🐨 Kody and his instructions will guide you to success.
+
+By the end of it all, the tests (`npm run test:e2e:dev`) must pass!
