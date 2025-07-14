@@ -23,6 +23,9 @@
       "path": "exercises/02.test-setup/01.solution.custom-fixtures"
     },
     {
+      "path": "exercises/02.test-setup/02.problem.mock-databases"
+    },
+    {
       "path": "exercises/02.test-setup/02.solution.mock-databases"
     },
     {
