@@ -1,19 +1,5 @@
 # Blocking unneeded requests
 
-Our application now has [One Dollar Stats](https://onedollarstats.com/) for very simple analytics. That's useful in production but we don't need this in our tests. It only creates unnecessary requests and takes time.
+Good job! 👏
 
-Let's block this kind of requests in Playwright!
-
-```ts
-// test-extend.ts
-test.beforeAll(({ network }) => {
-	network.use(
-		http.get('https://assets.onedollarstats.com/*', () => {
-			return Response.error()
-		}),
-	)
-})
-```
-
-- Belongs to the test setup, not fixtures? If a test doesn't use the custom `test()` function from `fixtures.ts`, it won't have those requests blocked.
-- Consider responding with an _empty response_. Responding with a network error will print an error to the browser console, creating noise. Mocking 3rd-party side-effect requests with empty responses should have no effect on the app (cause we want to exclude them, in the first place).
+Please wait for the others to finish so we could go through the solution to this exercise together.

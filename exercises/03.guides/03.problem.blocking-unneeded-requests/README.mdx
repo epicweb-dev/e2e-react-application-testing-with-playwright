@@ -1,5 +1,9 @@
 # Blocking unneeded requests
 
+Our application now has [One Dollar Stats](https://onedollarstats.com/) for very simple analytics. That's useful in production but we don't need this analytics script running in our tests. It only creates unnecessary requests and takes time.
+
+Let's block this kind of requests in Playwright!
+
 ## Your task
 
 👨‍💼 In this one, your task is to block a certain HTTP request fired by the app. I'm talking about this analytics script:
