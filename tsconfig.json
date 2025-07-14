@@ -35,6 +35,9 @@
       "path": "exercises/02.test-setup/04.solution.api-mocking"
     },
     {
+      "path": "exercises/02.test-setup/05.problem.test-data"
+    },
+    {
       "path": "exercises/02.test-setup/05.solution.test-data"
     },
     {

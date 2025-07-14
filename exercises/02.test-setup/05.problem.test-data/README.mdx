@@ -1,0 +1,13 @@
+# Test data
+
+## Your task
+
+👨‍💼 In this one, your goal is to test that your app displays the list of user's notes. For that, the authenticated user must have some notes to display! The `user` we are creating via the `authenticate` function right now has no notes and you have to change that fact for this test case to pass.
+
+🐨 First, implement the `createNotes` utility you will use in your tests to create notes for the authenticated user. Go to the <InlineFile file="./tests/e2e/utils.ts">`tests/e2e/utils.ts`</InlineFile> file and follow the instruction to have that utility ready.
+
+<callout-info>The `createNotes` utility will return a [_disposable object_](https://www.epicweb.dev/better-test-setup-with-disposable-objects). By doing so, you will be able to remove the notes you've created so they don't persist on the authenticated user across test runs. Remember that different resources might have different persistence time. For example, the user session persists across tests, but the notes you create _must not_. If they do, the next time you run this test case, the user will have twice the number of notes, causing the test to fail. Cleaning up after yourself is essential to maintaining reproducible tests.</callout-info>
+
+🐨 Next, head to the test case in <InlineFile file="./tests/e2e/notes-list.test.ts">`tests/e2e/utils.ts`</InlineFile> and complete it, using the newly-created `createNotes` utility.
+
+🐨 Finally, run the `npm run test:e2e:dev` command to make sure that the test is passing. Trigger the test run multiple times to verify that your test setup cleans up after itself and the test results are idempotent.
