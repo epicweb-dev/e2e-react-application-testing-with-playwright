@@ -74,6 +74,9 @@
       "path": "exercises/04.debugging/02.solution.trace-viewer"
     },
     {
+      "path": "exercises/04.debugging/03.problem.live-debugging"
+    },
+    {
       "path": "exercises/04.debugging/03.solution.live-debugging"
     }
   ]
