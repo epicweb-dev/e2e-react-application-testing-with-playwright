@@ -1,0 +1,31 @@
+# Live debugging
+
+Try running end-to-end tests now. Looks like the `logout.test.ts` is failing because it times out on a certain UI element. Now, before you try to fix this, let's explore _live debugging_ in Playwright and how it can help you get to the bottom of the trickiest of issues.
+
+## Your task
+
+👨‍💼 In this exercise, your task is to debug the failing `logout.test.ts`. And not just debug it but use the built-in debugging capabilities of the Playwright extension.
+
+🐨 Start by ensuring that the "Show browser" checkbox in the "Settings" section of the Playwright extension is _checked_. This will make Playwright spawn and show you a headful browser instance when running and debugging your tests via the extension.
+
+🐨 Now, it's time to break the failing test into steps (or breakpoints!). Right-click the gutter next to the action that clicks on the user menu and select the "Add Breakpoint" option from the context menu. This will add a breakpoint on that line, stopping the test execution when it reaches it.
+
+```ts
+await userMenu.click()
+```
+
+🐨 In a similar way, add another breakpoint right when the test is clicking on the "Logout" link over here:
+
+```ts
+await userMenu.getByRole('link', { name: 'Logout' }).click()
+```
+
+🐨 With the breakpoints set, it is time to run this test in a debug mode. To do that, right-click on the gutter next to the test case and select the "Debug Test" option from the context menu. Clicking on that option will run our failing test in a debug mode.
+
+Once the test run reaches your first breakpoint, it will stop. Great! Use this opportunity to look around, and continue by resuming the code execution in the debugging controls in Visual Studio Code.
+
+🐨 Step through the breakpoints you've added earlier and observe the state of your app. Pay close attention to what is on the screen when the test times out on the "Logout" link element. Notice anything suspicious?
+
+> 🦉 Tip: Use the "Pick locator" button from the Playwright extension to hover over various UI elements on the screen directly in the browser. See if the locators we have in test are actually correct.
+
+🐨 Locate the issue and fix the test to have it passing!

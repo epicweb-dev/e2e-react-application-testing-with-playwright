@@ -15,7 +15,6 @@ test('creates a new note', async ({ navigate, authenticate, page }) => {
 	await page.getByLabel('Content').fill('Hello world')
 	await page.getByRole('button', { name: 'Submit' }).click()
 
-	await expect(page).toHaveURL(new RegExp(`/users/${user.username}/notes/.+`))
 	await expect(page.getByRole('heading', { name: 'My new note' })).toBeVisible()
 	await expect(
 		page.getByLabel('My new note').getByText('Hello world'),

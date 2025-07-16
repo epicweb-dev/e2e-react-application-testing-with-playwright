@@ -36,7 +36,9 @@ const user = definePersona('user', {
 	},
 	async verifySession({ page, session }) {
 		await page.goto('/')
-		await page.getByText(session.user.name!).isVisible()
+		await expect(page.getByText(session.user.name!)).toBeVisible({
+			timeout: 100,
+		})
 	},
 	async destroySession({ session }) {
 		await prisma.user.deleteMany({ where: { id: session.user.id } })

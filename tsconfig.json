@@ -35,6 +35,9 @@
       "path": "exercises/02.test-setup/03.solution.authentication"
     },
     {
+      "path": "exercises/02.test-setup/04.problem.api-mocking"
+    },
+    {
       "path": "exercises/02.test-setup/04.solution.api-mocking"
     },
     {
