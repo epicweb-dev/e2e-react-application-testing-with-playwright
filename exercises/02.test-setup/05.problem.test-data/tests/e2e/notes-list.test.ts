@@ -1,5 +1,5 @@
+import { createNotes } from '#tests/e2e/utils'
 import { test, expect } from '#tests/test-extend.ts'
-import { createNotes } from './utils'
 
 test('displays all user notes', async ({ navigate, authenticate, page }) => {
 	const { user } = await authenticate({ as: 'user' })

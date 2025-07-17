@@ -6,7 +6,7 @@ import { prisma } from '#app/utils/db.server.ts'
 //
 // 🐨 Annotate the `args` argument of the `createNotes` function to be
 // of the following type:
-// { ownerId: string, data: Array<Omit<Prisma.NoteCreateManyInput, 'ownerId'>> }
+// { ownerId: string, notes: Array<Omit<Prisma.NoteCreateManyInput, 'ownerId'>> }
 //
 // 🐨 In the body of the `createNotes` function, declare a variable called "notes".
 // As the value for this variable, assign the result of creating multiple
@@ -14,10 +14,10 @@ import { prisma } from '#app/utils/db.server.ts'
 // 💰 const notes = await prisma.note.createManyAndReturn({})
 //
 // 🐨 In the argument to the `createManyAndReturn` method call, provide the "data"
-// key. As the value for the "data" key, iterate over `args.data` and compose an
+// key. As the value for the "data" key, iterate over `args.notes` and compose an
 // object of the following shape:
-// { ownerId: args.ownerId, ...data }
-// 💰 { data: args.data.map((data) => ({ ... })) }
+// { ownerId: args.ownerId, ...note }
+// 💰 { data: args.notes.map((note) => ({ ... })) }
 //
 // 🐨 From the `createNotes` function, return an object that has a key "values".
 // Assign the `notes` variable as the value of the "values" key.
@@ -30,6 +30,5 @@ import { prisma } from '#app/utils/db.server.ts'
 // 💰 return { async[Symbol.asyncDispose]() {} }
 //
 // 🐨 In the asynchronous dispose callback, use the `prisma` client to delete
-// the previously created notes by their `id` property.
+// the notes where the owner id is `args.ownerId`.
 // 💰 await prisma.note.deleteMany({ where: {} })
-// 💰 { where: { id: { in: arrayOfNoteIds } } }

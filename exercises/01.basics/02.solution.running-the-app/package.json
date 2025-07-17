@@ -21,9 +21,9 @@
     "test": "vitest",
     "coverage": "vitest run --coverage",
     "test:e2e": "npm run test:e2e:dev --silent",
-    "test:e2e:dev": "playwright test --ui",
+    "test:e2e:dev": "npx playwright test --ui",
     "pretest:e2e:run": "npm run build",
-    "test:e2e:run": "cross-env CI=true playwright test",
+    "test:e2e:run": "npx cross-env CI=true npx playwright test",
     "test:e2e:install": "npx playwright install --with-deps chromium",
     "typecheck": "react-router typegen && tsc",
     "validate": "run-p \"test -- --run\" lint typecheck test:e2e:run"

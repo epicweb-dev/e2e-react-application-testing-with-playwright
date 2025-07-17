@@ -1,0 +1,28 @@
+# UI mode
+
+## Your task
+
+While you were gone, I've added a <InlineFile file="./tests/e2e/notes-search.test.ts">new test case</InlineFile> to verify that user's notes can be found through the search. But something didn't go well... That test is failing!
+
+👨‍💼 In this one, your task is to debug the failing test and fix it. The thing is, the test case at hand has a number of different steps:
+
+1. Searching for the user in the search bar.
+1. Going to the user profile page from the search results.
+1. Going to the user's notes from their profile page.
+1. Opening a specific note.
+
+And to get a full picture of what is happening, you would need to _visualize_ and _step through_ your test run.
+
+That is precisely what the UI mode in Playwright is for.
+
+🐨 Start by running the failed test in the UI mode by providing the `--ui` flag to the test command:
+
+```sh
+npm test -- --ui
+```
+
+> Explore the Playwright UI mode and its controls. For example, you can put the problematic test case in _watch mode_ so it re-runs while you're debugging it!
+
+🐨 Using the actions list, find the failing action and explore it. Take a look at the failure detail, as well as the actions coming before it. The goal here is to get to the bottom of this issue and find the root cause!
+
+🐨 Once you've found the root cause for the issue, fix it and have the test green and passing.
