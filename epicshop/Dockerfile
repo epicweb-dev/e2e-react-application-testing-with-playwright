@@ -1,4 +1,4 @@
-FROM node:20-bookworm-slim as base
+FROM node:24-bookworm-slim as base
 
 RUN apt-get update && apt-get install -y git
 
@@ -16,6 +16,6 @@ ADD . .
 RUN npm install --omit=dev
 
 CMD rm -rf ${EPICSHOP_CONTEXT_CWD} && \
-    git clone https://github.com/epicweb-dev/e2e-react-application-testing-with-playwright ${EPICSHOP_CONTEXT_CWD} && \
+    git clone --depth 1 https://github.com/epicweb-dev/e2e-react-application-testing-with-playwright ${EPICSHOP_CONTEXT_CWD} && \
     cd ${EPICSHOP_CONTEXT_CWD} && \
     npx epicshop start
