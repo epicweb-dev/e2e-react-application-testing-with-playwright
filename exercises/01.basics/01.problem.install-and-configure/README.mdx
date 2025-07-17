@@ -18,7 +18,7 @@ npx playwright install --with-deps chromium
 
 🐨 Next, create `playwright.config.ts` file at the root of your project. This is Playwright's configuration file. You will use it to set up Playwright in the way that makes sense for your project.
 
-🐨 In `package.json`, create a new script called `test:e2e`. You will use this script to run your end-to-end tests at the end of this exercise. Use the `playwright test` command as the value for that script.
+🐨 In `package.json`, create a new script called `test`. You will use this script to run your end-to-end tests at the end of this exercise. Use the `npx playwright test` command as the value for that script.
 
 🐨 Create a directory called `tests`. In that directory, create a new test file called `epicweb.test.ts`.
 
@@ -45,4 +45,4 @@ To do that, your test would have to perform a series of steps:
 
 3. Assert that the heading element is visible on the page via `await expect(element).toBeVisible()`.
 
-🐨 Finally, run this test via `npm run test:e2e` in the terminal. You should see it passing.
+🐨 Finally, run this test via `npm test` in the terminal. You should see it passing.

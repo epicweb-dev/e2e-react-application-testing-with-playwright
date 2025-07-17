@@ -18,4 +18,10 @@ Let's block this kind of requests in Playwright!
 
 🐨 Go to the <InlineFile name="./tests/test-extend.ts">`tests/test-extend.ts`</InlineFile> file and follow the instructions to intercept the problematic request and handle its response.
 
-🐨 Once you do, run the tests via the `npm run test:e2e:dev` command. Inspect the "Network" tab in Playwright's UI mode that find the request that you have intercepted. It should have an empty response.
+🐨 Finally, it would be great to verify your solution and make sure that the request in question indeed receives a mocked response during the test. To do that, run your tests in a UI mode:
+
+```sh
+npm test -- --ui
+```
+
+In the UI mode window, open the "Network" tab and find the request that you have intercepted (`GET /stonks.js`). You should see it having a mocked response!

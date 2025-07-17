@@ -18,7 +18,7 @@
     "setup": "npm run build && prisma migrate deploy && prisma generate --sql && playwright install",
     "start": "cross-env NODE_ENV=production node .",
     "start:mocks": "cross-env NODE_ENV=production MOCKS=true tsx .",
-    "test": "vitest",
+    "test": "npx playwright test",
     "coverage": "vitest run --coverage",
     "test:e2e": "npm run test:e2e:dev --silent",
     "test:e2e:dev": "npx playwright test --ui",
