@@ -35,6 +35,7 @@ test('displays location suggestions when creating a new note', async ({
 	await page.getByLabel('Content').fill('Hello world')
 
 	const locationInput = page.getByLabel('Location')
+	await locationInput.waitFor({ state: 'visible' })
 
 	await locationInput.fill('San')
 	await expect(page.getByRole('option')).toHaveText([

@@ -228,6 +228,7 @@ export function ComboboxField({
 	const [isDirty, setDirty] = useState(false)
 	const [isListOpen, setListOpen] = useState(false)
 	const [query, setQuery] = useState<string>('')
+
 	const [filtered, setFiltered] = useState<
 		Array<{ label: string; value: string }>
 	>([])
