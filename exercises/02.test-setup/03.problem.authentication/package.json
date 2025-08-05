@@ -26,7 +26,8 @@
     "test:e2e:run": "npx cross-env CI=true npx playwright test",
     "test:e2e:install": "npx playwright install --with-deps chromium",
     "typecheck": "react-router typegen && tsc",
-    "validate": "run-p \"test -- --run\" lint typecheck test:e2e:run"
+    "validate": "run-p \"test -- --run\" lint typecheck test:e2e:run",
+    "post:playground": "npx react-router typegen && prisma migrate deploy && prisma generate --sql"
   },
   "prettier": "@epic-web/config/prettier",
   "eslintIgnore": [
@@ -158,7 +159,7 @@
     "vitest": "^3.1.3"
   },
   "engines": {
-    "node": ">=22.14.0"
+    "node": "22.14.0"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
