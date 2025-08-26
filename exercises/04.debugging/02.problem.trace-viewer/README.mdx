@@ -2,7 +2,19 @@
 
 ## Your task
 
-👨‍💼 Another exercise, another task to solve! In this one, the <InlineFile name="./tests/e2e/notes-create.test.ts">`tests/e2e/notes-create.test.ts`</InlineFile> test is _failing_ on CI. But if you run it locally, it seems perfectly fine (don't get my word for it, verify that by yourself!).
+👨‍💼 Another exercise, another task to solve! In this one, the <InlineFile name="./tests/e2e/notes-create.test.ts">`tests/e2e/notes-create.test.ts`</InlineFile> test is _failing_ on CI.
+
+```
+Test timeout of 15000ms exceeded.
+
+@notes-create.test.ts:10
+
+Error: locator.click: Test timeout of 15000ms exceeded.
+Call log:
+  - waiting for getByRole('button', { name: 'Submit' })
+```
+
+But if you run it locally, it seems perfectly fine (don't get my word for it, verify that by yourself!).
 
 Your goal is to dug deeper and figure out why is this test failing only on CI. To help you do that, I'm including a _trace_ of the failed CI test in the `trace.zip` archive. It will be a crucial element to help you uncover the root cause of the issue.
 
