@@ -36,8 +36,9 @@
 
 ## System Requirements
 
-- [git][git] v2.18 or greater
+- **[Docker][docker] v28 or greater**
 - **[NodeJS][node] v22.14.0 or greater**
+- [git][git] v2.18 or greater
 - [npm][npm] v8 or greater
 
 All of these must be available in your `PATH`. To verify things are set up
@@ -87,6 +88,7 @@ Learn all about the workshop app on the
 [npm]: https://www.npmjs.com/
 [node]: https://nodejs.org
 [git]: https://git-scm.com/
+[docker]: https://www.docker.com/products/docker-desktop/
 [build-badge]: https://img.shields.io/github/actions/workflow/status/epicweb-dev/e2e-react-application-testing-with-playwright/validate.yml?branch=main&logo=github&style=flat-square
 [build]: https://github.com/epicweb-dev/e2e-react-application-testing-with-playwright/actions?query=workflow%3Avalidate
 [license-badge]: https://img.shields.io/badge/license-GPL%203.0%20License-blue.svg?style=flat-square

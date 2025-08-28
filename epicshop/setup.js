@@ -34,6 +34,16 @@ if (major < 8 || (major === 8 && minor < 16)) {
 	throw new Error('npm version is out of date')
 }
 
+// Docker check.
+{
+	const output = spawnSync('docker --version', { shell: true })
+	if (output.status !== 0) {
+		throw new Error(
+			'Docker is not installed. Please make sure you install it before proceeding with the workshop: https://www.docker.com/products/docker-desktop/',
+		)
+	}
+}
+
 {
 	const command =
 		'npx --yes "https://gist.github.com/kentcdodds/bb452ffe53a5caa3600197e1d8005733" -q'
