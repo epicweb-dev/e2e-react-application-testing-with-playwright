@@ -3,3 +3,26 @@
 - PostgreSQL on Docker
 
 Use [Testcontainers](https://testcontainers.com/?language=nodejs) for a throwaway PostgreSQL image that's isolated.
+
+## Findings
+
+- Testcontainers are still nice on CI so people don't have to manage docker images manually.
+- Playwright doesn't have a hook to run logic _before_ `webServer`. Out of luck to spawn a testcontainer and pass its URI to the spawning app.
+- Even if we use a static DB URL, `docker` doesn't have any commands to manage "run if doesn't exist, otherwise ignore". Requires bash workarounds.
+
+---
+
+## Thoughts
+
+- Database instance is bound to an app instance. As such, DB becomes a _shared state_ across test cases.
+- If I want full test case isolation, I need to spawn a unique app instance (with its unique, empty DB) in each test case. That's expensive because it implies _build_ in each test case (Prisma client bakes DB URL on build).
+
+Given all of this, I think this is how you approach it:
+
+1. Spin up the DB container ONCE before all tests;
+1. Build the app.
+1. Run Prisma migrations (i.e. create tables);
+1. Do NOT seed the database by default (starts clean);
+1. Seed data in each test case and rely _exclusively_ on that data (= isolation).
+
+This addresses the main issue of the shared state: modifying shared resources across unrelated test cases. **Each test case must create its own set of data before proceeding**.

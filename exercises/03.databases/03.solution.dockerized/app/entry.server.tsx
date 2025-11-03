@@ -24,6 +24,8 @@ global.ENV = getEnv()
 
 const MODE = process.env.NODE_ENV ?? 'development'
 
+console.log(new Date(), 'APP: DB URL:', process.env.DATABASE_URL)
+
 type DocRequestArgs = Parameters<HandleDocumentRequestFunction>
 
 export default async function handleRequest(...args: DocRequestArgs) {

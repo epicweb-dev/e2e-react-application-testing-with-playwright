@@ -40,6 +40,7 @@ export default defineConfig({
 		env: {
 			PORT,
 			NODE_ENV: 'test',
+			DATABASE_URL: process.env.DATABASE_URL,
 		},
 	},
 })
