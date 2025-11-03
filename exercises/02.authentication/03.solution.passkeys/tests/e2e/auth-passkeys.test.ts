@@ -1,6 +1,5 @@
-import { generateKeyPairSync } from 'node:crypto'
 import { type Page } from '@playwright/test'
-import cbor from 'cbor'
+import { createTestPasskey } from 'test-passkey'
 import { createPasskey, createUser } from '#tests/db-utils.ts'
 import { test, expect } from '#tests/test-extend.ts'
 
@@ -25,57 +24,33 @@ async function createWebAuthnClient(page: Page) {
 	}
 }
 
-function generateKeys() {
-	const { privateKey, publicKey } = generateKeyPairSync('ec', {
-		namedCurve: 'P-256',
-	})
-
-	const spkiPublicKey = publicKey.export({ type: 'spki', format: 'der' })
-	const publicKeyBytes = spkiPublicKey.subarray(-65)
-	const x = publicKeyBytes.subarray(1, 33)
-	const y = publicKeyBytes.subarray(33, 65)
-
-	const cosePublickey = cbor.encode(
-		new Map<number, number | Buffer>([
-			[1, 2],
-			[3, -7],
-			[-1, 1],
-			[-2, x],
-			[-3, y],
-		]),
-	)
-
-	return {
-		privateKey: privateKey
-			.export({ type: 'pkcs8', format: 'der' })
-			.toString('base64'),
-		publicKey: cosePublickey,
-	}
-}
-
 test('authenticates using a passkey', async ({ navigate, page }) => {
 	await navigate('/login')
 
-	const { client, authenticatorId } = await createWebAuthnClient(page)
-
-	const keys = generateKeys()
-	await using user = await createUser()
-	await using passkey = await createPasskey({
-		userId: user.id,
-		publicKey: keys.publicKey,
+	const passkey = createTestPasskey({
+		rpId: new URL(page.url()).hostname,
 	})
 
+	// Add the passkey to the server.
+	await using user = await createUser()
+	await using _ = await createPasskey({
+		id: passkey.credential.credentialId,
+		aaguid: passkey.credential.aaguid || '',
+		publicKey: passkey.publicKey,
+		userId: user.id,
+		counter: passkey.credential.signCount,
+	})
+
+	// Add the passkey to the browser.
+	const { client, authenticatorId } = await createWebAuthnClient(page)
 	await client.send('WebAuthn.addCredential', {
 		authenticatorId,
 		credential: {
-			rpId: new URL(page.url()).hostname,
-			credentialId: passkey.id,
-			signCount: 0,
+			...passkey.credential,
 			isResidentCredential: true,
 			userName: user.username,
 			userHandle: btoa(user.id),
 			userDisplayName: user.name ?? user.email,
-			privateKey: keys.privateKey,
 		},
 	})
 

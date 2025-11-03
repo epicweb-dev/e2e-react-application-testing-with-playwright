@@ -1,8 +1,8 @@
 import { faker } from '@faker-js/faker'
 import bcrypt from 'bcryptjs'
 import { UniqueEnforcer } from 'enforce-unique'
-import { prisma } from '#app/utils/db.server.ts'
 import { getPasswordHash } from '#app/utils/auth.server.ts'
+import { prisma } from '#app/utils/db.server.ts'
 
 const uniqueUsernameEnforcer = new UniqueEnforcer()
 
@@ -51,21 +51,23 @@ export async function createUser() {
 	}
 }
 
-export async function createPasskey(input: { userId: string; publicKey: any }) {
+export async function createPasskey(input: {
+	id: string
+	userId: string
+	aaguid: string
+	publicKey: Uint8Array
+	counter?: number
+}) {
 	const passkey = await prisma.passkey.create({
 		data: {
-			/**
-			 * @note This has to be base64-encoded because WebAuthn expects that encoding.
-			 * Store the same encoded value in the database so the keypass could be looked up by ID.
-			 */
-			id: Buffer.from(crypto.randomUUID()).toString('base64'),
-			aaguid: Buffer.from(new Uint8Array(16)).toString('base64'),
+			id: input.id,
+			aaguid: input.aaguid,
 			userId: input.userId,
 			publicKey: input.publicKey,
 			backedUp: false,
 			webauthnUserId: input.userId,
 			deviceType: 'singleDevice',
-			counter: 0,
+			counter: input.counter || 0,
 		},
 	})
 

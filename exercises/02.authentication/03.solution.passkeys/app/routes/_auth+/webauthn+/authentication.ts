@@ -64,8 +64,6 @@ export async function action({ request }: Route.ActionArgs) {
 			},
 		})
 
-		console.log(333)
-
 		if (!verification.verified) {
 			throw new Error('Authentication verification failed')
 		}
