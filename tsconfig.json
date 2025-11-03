@@ -5,82 +5,67 @@
   ],
   "references": [
     {
-      "path": "exercises/01.basics/01.problem.install-and-configure"
+      "path": "exercises/01.setup/01.problem.install-and-configure"
     },
     {
-      "path": "exercises/01.basics/01.solution.install-and-configure"
+      "path": "exercises/01.setup/01.solution.install-and-configure"
     },
     {
-      "path": "exercises/01.basics/02.problem.running-the-app"
+      "path": "exercises/01.setup/02.problem.running-the-app"
     },
     {
-      "path": "exercises/01.basics/02.solution.running-the-app"
+      "path": "exercises/01.setup/02.solution.running-the-app"
     },
     {
-      "path": "exercises/02.test-setup/01.problem.custom-fixtures"
+      "path": "exercises/01.setup/03.problem.custom-fixtures"
     },
     {
-      "path": "exercises/02.test-setup/01.solution.custom-fixtures"
+      "path": "exercises/01.setup/03.solution.custom-fixtures"
     },
     {
-      "path": "exercises/02.test-setup/02.problem.mock-databases"
+      "path": "exercises/02.authentication/01.problem.basic"
     },
     {
-      "path": "exercises/02.test-setup/02.solution.mock-databases"
+      "path": "exercises/02.authentication/01.solution.basic"
     },
     {
-      "path": "exercises/02.test-setup/03.problem.authentication"
+      "path": "exercises/02.authentication/03.solution.passkeys"
     },
     {
-      "path": "exercises/02.test-setup/03.solution.authentication"
+      "path": "exercises/03.databases/04.problem.test-data"
     },
     {
-      "path": "exercises/02.test-setup/04.problem.api-mocking"
+      "path": "exercises/03.databases/04.solution.test-data"
     },
     {
-      "path": "exercises/02.test-setup/04.solution.api-mocking"
+      "path": "exercises/04.guides/01.problem.recording-tests"
     },
     {
-      "path": "exercises/02.test-setup/05.problem.test-data"
+      "path": "exercises/04.guides/01.solution.recording-tests"
     },
     {
-      "path": "exercises/02.test-setup/05.solution.test-data"
+      "path": "exercises/04.guides/02.problem.api-mocking"
     },
     {
-      "path": "exercises/03.guides/01.problem.recording-interactions"
+      "path": "exercises/04.guides/02.solution.api-mocking"
     },
     {
-      "path": "exercises/03.guides/01.solution.recording-interactions"
+      "path": "exercises/05.debugging/01.problem.ui-mode"
     },
     {
-      "path": "exercises/03.guides/02.problem.test-annotations"
+      "path": "exercises/05.debugging/01.solution.ui-mode"
     },
     {
-      "path": "exercises/03.guides/02.solution.test-annotations"
+      "path": "exercises/05.debugging/02.problem.trace-viewer"
     },
     {
-      "path": "exercises/03.guides/03.problem.blocking-unneeded-requests"
+      "path": "exercises/05.debugging/02.solution.trace-viewer"
     },
     {
-      "path": "exercises/03.guides/03.solution.blocking-unneeded-requests"
+      "path": "exercises/05.debugging/03.problem.live-debugging"
     },
     {
-      "path": "exercises/04.debugging/01.problem.ui-mode"
-    },
-    {
-      "path": "exercises/04.debugging/01.solution.ui-mode"
-    },
-    {
-      "path": "exercises/04.debugging/02.problem.trace-viewer"
-    },
-    {
-      "path": "exercises/04.debugging/02.solution.trace-viewer"
-    },
-    {
-      "path": "exercises/04.debugging/03.problem.live-debugging"
-    },
-    {
-      "path": "exercises/04.debugging/03.solution.live-debugging"
+      "path": "exercises/05.debugging/03.solution.live-debugging"
     }
   ]
 }
