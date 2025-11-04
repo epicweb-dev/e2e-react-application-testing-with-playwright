@@ -23,6 +23,9 @@
       "path": "exercises/01.fundamentals/03.solution.custom-fixtures"
     },
     {
+      "path": "exercises/02.authentication/01.solution.basic"
+    },
+    {
       "path": "exercises/02.authentication/03.solution.passkeys"
     },
     {
