@@ -26,6 +26,9 @@
       "path": "exercises/02.authentication/01.solution.basic"
     },
     {
+      "path": "exercises/02.authentication/02.solution.2fa"
+    },
+    {
       "path": "exercises/02.authentication/03.solution.passkeys"
     },
     {
