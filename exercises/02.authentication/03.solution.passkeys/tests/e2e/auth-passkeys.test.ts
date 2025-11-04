@@ -14,6 +14,7 @@ async function createWebAuthnClient(page: Page) {
 			hasResidentKey: true,
 			hasUserVerification: true,
 			isUserVerified: true,
+			// Authenticator will automatically respond to the next prompt in the browser.
 			automaticPresenceSimulation: true,
 		},
 	})
@@ -24,9 +25,10 @@ async function createWebAuthnClient(page: Page) {
 	}
 }
 
-test('authenticates using a passkey', async ({ navigate, page }) => {
+test('authenticates using an existing passkey', async ({ navigate, page }) => {
 	await navigate('/login')
 
+	// Create a test passkey.
 	const passkey = createTestPasskey({
 		rpId: new URL(page.url()).hostname,
 	})
@@ -57,4 +59,25 @@ test('authenticates using a passkey', async ({ navigate, page }) => {
 	await page.getByRole('button', { name: 'Login with a passkey' }).click()
 
 	await expect(page.getByText(user.name!)).toBeVisible()
+})
+
+test('displays an error when authenticating via a passkey fails', async ({
+	navigate,
+	page,
+}) => {
+	await navigate('/login')
+
+	const { client, authenticatorId } = await createWebAuthnClient(page)
+	await client.send('WebAuthn.setUserVerified', {
+		authenticatorId,
+		isUserVerified: false,
+	})
+
+	await page.getByRole('button', { name: 'Login with a passkey' }).click()
+
+	await expect(
+		page.getByText(
+			'Failed to authenticate with passkey: The operation either timed out or was not allowed',
+		),
+	).toBeVisible()
 })
