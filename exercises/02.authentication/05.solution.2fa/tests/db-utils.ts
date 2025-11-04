@@ -1,10 +1,14 @@
+import { type generateTOTP } from '@epic-web/totp'
 import { faker } from '@faker-js/faker'
 import bcrypt from 'bcryptjs'
 import { UniqueEnforcer } from 'enforce-unique'
+import { twoFAVerifyVerificationType } from '#app/routes/settings+/profile.two-factor.verify.tsx'
+import { getPasswordHash } from '#app/utils/auth.server.ts'
+import { prisma } from '#app/utils/db.server.ts'
 
 const uniqueUsernameEnforcer = new UniqueEnforcer()
 
-export function createUser() {
+export function generateUserInfo() {
 	const firstName = faker.person.firstName()
 	const lastName = faker.person.lastName()
 
@@ -22,10 +26,54 @@ export function createUser() {
 		.slice(0, 20)
 		.toLowerCase()
 		.replace(/[^a-z0-9_]/g, '_')
+
 	return {
 		username,
 		name: `${firstName} ${lastName}`,
 		email: `${username}@example.com`,
+	}
+}
+
+export async function createUser() {
+	const userInfo = generateUserInfo()
+	const password = 'supersecret'
+	const user = await prisma.user.create({
+		data: {
+			...userInfo,
+			password: { create: { hash: await getPasswordHash(password) } },
+		},
+	})
+
+	return {
+		async [Symbol.asyncDispose]() {
+			await prisma.user.deleteMany({
+				where: { id: user.id },
+			})
+		},
+		...user,
+		password,
+	}
+}
+
+export async function createVerification(input: {
+	totp: Awaited<ReturnType<typeof generateTOTP>>
+	userId: string
+}) {
+	const verification = await prisma.verification.create({
+		data: {
+			...input.totp,
+			type: twoFAVerifyVerificationType,
+			target: input.userId,
+		},
+	})
+
+	return {
+		async [Symbol.asyncDispose]() {
+			await prisma.verification.deleteMany({
+				where: { id: verification.id },
+			})
+		},
+		...verification,
 	}
 }
 

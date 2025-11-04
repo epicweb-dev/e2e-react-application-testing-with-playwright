@@ -34,10 +34,11 @@ export function generateUserInfo() {
 
 export async function createUser() {
 	const userInfo = generateUserInfo()
+	const password = 'supersecret'
 	const user = await prisma.user.create({
 		data: {
 			...userInfo,
-			password: { create: { hash: await getPasswordHash('supersecret') } },
+			password: { create: { hash: await getPasswordHash(password) } },
 		},
 	})
 
@@ -48,6 +49,7 @@ export async function createUser() {
 			})
 		},
 		...user,
+		password,
 	}
 }
 
