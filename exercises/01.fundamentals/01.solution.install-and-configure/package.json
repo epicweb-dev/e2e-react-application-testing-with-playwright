@@ -1,5 +1,5 @@
 {
-  "name": "exercises_01.setup_01.solution.install-and-configure",
+  "name": "exercises_01.fundamentals_01.solution.install-and-configure",
   "scripts": {
     "test:e2e": "playwright test"
   },
