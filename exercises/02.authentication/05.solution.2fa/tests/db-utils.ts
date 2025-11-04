@@ -1,12 +1,10 @@
 import { faker } from '@faker-js/faker'
 import bcrypt from 'bcryptjs'
 import { UniqueEnforcer } from 'enforce-unique'
-import { getPasswordHash } from '#app/utils/auth.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
 
 const uniqueUsernameEnforcer = new UniqueEnforcer()
 
-export function generateUserInfo() {
+export function createUser() {
 	const firstName = faker.person.firstName()
 	const lastName = faker.person.lastName()
 
@@ -24,64 +22,10 @@ export function generateUserInfo() {
 		.slice(0, 20)
 		.toLowerCase()
 		.replace(/[^a-z0-9_]/g, '_')
-
 	return {
 		username,
 		name: `${firstName} ${lastName}`,
 		email: `${username}@example.com`,
-	}
-}
-
-export async function createUser() {
-	const userInfo = generateUserInfo()
-	const password = 'supersecret'
-	const user = await prisma.user.create({
-		data: {
-			...userInfo,
-			password: { create: { hash: await getPasswordHash(password) } },
-		},
-	})
-
-	return {
-		async [Symbol.asyncDispose]() {
-			await prisma.user.deleteMany({
-				where: { id: user.id },
-			})
-		},
-		...user,
-		password,
-	}
-}
-
-export async function createPasskey(input: {
-	id: string
-	userId: string
-	aaguid: string
-	publicKey: Uint8Array
-	counter?: number
-}) {
-	const passkey = await prisma.passkey.create({
-		data: {
-			id: input.id,
-			aaguid: input.aaguid,
-			userId: input.userId,
-			publicKey: input.publicKey,
-			backedUp: false,
-			webauthnUserId: input.userId,
-			deviceType: 'singleDevice',
-			counter: input.counter || 0,
-		},
-	})
-
-	return {
-		async [Symbol.asyncDispose]() {
-			await prisma.passkey.deleteMany({
-				where: {
-					id: passkey.id,
-				},
-			})
-		},
-		...passkey,
 	}
 }
 

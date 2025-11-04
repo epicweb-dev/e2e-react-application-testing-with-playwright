@@ -1,5 +1,5 @@
 {
-  "name": "exercises_02.authentication_05.problem.protected-logic",
+  "name": "exercises_02.authentication_02.solution.passkeys",
   "private": true,
   "sideEffects": false,
   "type": "module",
@@ -151,6 +151,7 @@
     "prettier-plugin-tailwindcss": "^0.6.11",
     "react-router-devtools": "^5.0.5",
     "remix-flat-routes": "^0.8.5",
+    "test-passkey": "^1.0.1",
     "tsx": "^4.19.4",
     "tw-animate-css": "^1.2.9",
     "typescript": "^5.8.3",
