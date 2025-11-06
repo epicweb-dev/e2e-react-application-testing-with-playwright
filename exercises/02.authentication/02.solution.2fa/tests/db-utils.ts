@@ -58,11 +58,11 @@ export async function createVerification(input: {
 	totp: Awaited<ReturnType<typeof generateTOTP>>
 	userId: string
 }) {
-	const { otp, ...totp } = input.totp
+	const { otp, ...totpConfig } = input.totp
 	const verification = await prisma.verification.create({
 		data: {
-			...totp,
-			type: '2fa-verify',
+			...totpConfig,
+			type: '2fa',
 			target: input.userId,
 		},
 	})

@@ -21,9 +21,13 @@ test('authenticates using two-factor authentication', async ({
 	await page.getByLabel('Password').fill(user.password)
 	await page.getByRole('button', { name: 'Log in' }).click()
 
+	await expect(
+		page.getByRole('heading', { name: 'Check your 2FA app' }),
+	).toBeVisible()
+
 	await page
 		.getByRole('textbox', { name: /code/i })
-		.fill((await generateTOTP()).otp)
+		.fill((await generateTOTP(totp)).otp)
 
 	await page.getByRole('button', { name: 'Submit' }).click()
 
