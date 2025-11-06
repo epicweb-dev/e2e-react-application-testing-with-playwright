@@ -2,7 +2,6 @@ import { type generateTOTP } from '@epic-web/totp'
 import { faker } from '@faker-js/faker'
 import bcrypt from 'bcryptjs'
 import { UniqueEnforcer } from 'enforce-unique'
-import { twoFAVerifyVerificationType } from '#app/routes/settings+/profile.two-factor.verify.tsx'
 import { getPasswordHash } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 
@@ -59,10 +58,11 @@ export async function createVerification(input: {
 	totp: Awaited<ReturnType<typeof generateTOTP>>
 	userId: string
 }) {
+	const { otp, ...totp } = input.totp
 	const verification = await prisma.verification.create({
 		data: {
-			...input.totp,
-			type: twoFAVerifyVerificationType,
+			...totp,
+			type: '2fa-verify',
 			target: input.userId,
 		},
 	})

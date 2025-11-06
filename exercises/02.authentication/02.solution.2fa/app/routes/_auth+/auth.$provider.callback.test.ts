@@ -9,7 +9,7 @@ import { GITHUB_PROVIDER_NAME } from '#app/utils/connections.tsx'
 import { prisma } from '#app/utils/db.server.ts'
 import { authSessionStorage } from '#app/utils/session.server.ts'
 import { generateTOTP } from '#app/utils/totp.server.ts'
-import { createUser } from '#tests/db-utils.ts'
+import { generateUserInfo } from '#tests/db-utils.ts'
 import { insertGitHubUser, deleteGitHubUsers } from '#tests/mocks/github.ts'
 import { server } from '#tests/mocks/index.ts'
 import { consoleError } from '#tests/setup/setup-test-env.ts'
@@ -109,7 +109,7 @@ test(`when a user is logged in and has already connected, it doesn't do anything
 test('when a user exists with the same email, create connection and make session', async () => {
 	const githubUser = await insertGitHubUser()
 	const email = githubUser.primaryEmail.toLowerCase()
-	const { userId } = await setupUser({ ...createUser(), email })
+	const { userId } = await setupUser({ ...generateUserInfo(), email })
 	const request = await setupRequest({ code: githubUser.code })
 	const response = await loader({ request, params: PARAMS, context: {} })
 
@@ -141,7 +141,7 @@ test('gives an error if the account is already connected to another user', async
 	const githubUser = await insertGitHubUser()
 	await prisma.user.create({
 		data: {
-			...createUser(),
+			...generateUserInfo(),
 			connections: {
 				create: {
 					providerName: GITHUB_PROVIDER_NAME,
@@ -245,7 +245,7 @@ async function setupRequest({
 	return request
 }
 
-async function setupUser(userData = createUser()) {
+async function setupUser(userData = generateUserInfo()) {
 	const session = await prisma.session.create({
 		data: {
 			expirationDate: getSessionExpirationDate(),

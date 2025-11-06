@@ -3,7 +3,7 @@ import { prisma } from '#app/utils/db.server.ts'
 import { MOCK_CODE_GITHUB } from '#app/utils/providers/constants'
 import {
 	createPassword,
-	createUser,
+	generateUserInfo,
 	getNoteImages,
 	getUserImages,
 } from '#tests/db-utils.ts'
@@ -19,7 +19,7 @@ async function seed() {
 	const userImages = await getUserImages()
 
 	for (let index = 0; index < totalUsers; index++) {
-		const userData = createUser()
+		const userData = generateUserInfo()
 		const user = await prisma.user.create({
 			select: { id: true },
 			data: {

@@ -5,8 +5,9 @@ import {
 	type AuthenticateFunction,
 } from 'playwright-persona'
 import { href, type Register } from 'react-router'
+import { getPasswordHash } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
-import { createUser } from '#tests/db-utils'
+import { generateUserInfo } from '#tests/db-utils'
 
 interface Fixtures {
 	navigate: <T extends keyof Register['pages']>(
@@ -17,11 +18,17 @@ interface Fixtures {
 
 const user = definePersona('user', {
 	async createSession({ page }) {
-		const user = await createUser()
+		const user = await prisma.user.create({
+			data: {
+				...generateUserInfo(),
+				roles: { connect: { name: 'user' } },
+				password: { create: { hash: await getPasswordHash('supersecret') } },
+			},
+		})
 
 		await page.goto('/login')
 		await page.getByLabel('Username').fill(user.username)
-		await page.getByLabel('Password').fill(user.password)
+		await page.getByLabel('Password').fill('supersecret')
 		await page.getByRole('button', { name: 'Log in' }).click()
 		await page.getByText(user.name!).waitFor({ state: 'visible' })
 
