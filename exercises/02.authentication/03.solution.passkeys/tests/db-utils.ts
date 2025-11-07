@@ -57,7 +57,7 @@ export async function createPasskey(input: {
 	id: string
 	userId: string
 	aaguid: string
-	publicKey: Uint8Array
+	publicKey: Uint8Array<ArrayBuffer>
 	counter?: number
 }) {
 	const passkey = await prisma.passkey.create({

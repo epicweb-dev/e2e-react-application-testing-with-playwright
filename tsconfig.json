@@ -32,6 +32,9 @@
       "path": "exercises/02.authentication/03.solution.passkeys"
     },
     {
+      "path": "exercises/02.authentication/04.solution.third-party-providers"
+    },
+    {
       "path": "exercises/02.authentication/05.problem.protected-logic"
     },
     {
