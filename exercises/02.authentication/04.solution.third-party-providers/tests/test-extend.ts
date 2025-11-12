@@ -69,7 +69,7 @@ const launcher = defineLauncher({
 		}
 	},
 	command() {
-		return 'npm run dev'
+		return 'npm run start:mocks'
 	},
 	url({ context }) {
 		return `http://localhost:${context.port}`
@@ -91,7 +91,6 @@ export const test = testBase.extend<Fixtures>({
 	async app({ databasePath }, use) {
 		prepareTestDatabase(databasePath)
 
-		let a = performance.now()
 		/**
 		 * @todo No need to re-run the whole app on test re-runs.
 		 * Would be nice to spawn the app once, then reuse it across re-runs.
@@ -103,7 +102,6 @@ export const test = testBase.extend<Fixtures>({
 				DATABASE_URL: `file:${databasePath}`,
 			}),
 		})
-		console.log('APP RUNNING IN:', performance.now() - a)
 
 		await use(app)
 		await app.dispose()

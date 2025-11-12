@@ -49,5 +49,7 @@ test('authenticates the user with a connected GitHub account', async ({
 	await page.getByRole('button', { name: 'Login with GitHub' }).click()
 
 	await expect(page.getByRole('link', { name: user.name! })).toBeVisible()
-	await expect(page.getByText('Your "kody" GitHub account')).toBeVisible()
+	await expect(
+		page.getByText('Your "kody" GitHub account has been connected'),
+	).toBeVisible()
 })
