@@ -1,4 +1,6 @@
+import { type AppProcess, defineLauncher } from '@epic-web/app-launcher'
 import { test as testBase, expect } from '@playwright/test'
+import getPort from 'get-port'
 import {
 	definePersona,
 	combinePersonas,
@@ -7,9 +9,10 @@ import {
 import { href, type Register } from 'react-router'
 import { getPasswordHash } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
-import { generateUserInfo } from '#tests/db-utils'
+import { generateUserInfo, prepareTestDatabase } from '#tests/db-utils'
 
 interface Fixtures {
+	app: AppProcess
 	navigate: <T extends keyof Register['pages']>(
 		...args: Parameters<typeof href<T>>
 	) => Promise<void>
@@ -45,10 +48,46 @@ const user = definePersona('user', {
 	},
 })
 
+const launcher = defineLauncher({
+	async context() {
+		return { port: await getPort() }
+	},
+	env({ context }) {
+		return {
+			PORT: context.port.toString(),
+		}
+	},
+	command() {
+		return 'npm run dev'
+	},
+	url({ context }) {
+		return `http://localhost:${context.port}`
+	},
+})
+
 export const test = testBase.extend<Fixtures>({
-	async navigate({ page }, use) {
+	async app({}, use, testInfo) {
+		const databasePath = `./test-${testInfo.testId}.db`
+		prepareTestDatabase(databasePath)
+
+		/**
+		 * @todo No need to re-run the whole app on test re-runs.
+		 * Would be nice to spawn the app once, then reuse it across re-runs.
+		 * Just clear the DB between re-runs, that's crucial.
+		 */
+		const app = await launcher.run({
+			env: () => ({
+				DATABASE_URL: `file:${databasePath}`,
+			}),
+		})
+
+		await use(app)
+		await app.dispose()
+	},
+	async navigate({ page, app }, use) {
 		await use(async (...args) => {
-			await page.goto(href(...args))
+			const url = new URL(href(...args), app.url)
+			await page.goto(url.href)
 		})
 	},
 	authenticate: combinePersonas(user),

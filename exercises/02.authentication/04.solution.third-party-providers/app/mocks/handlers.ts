@@ -5,7 +5,7 @@ import {
 	GitHubEmailSchema,
 } from '#app/utils/providers/github.server.ts'
 
-const githubUsers = new Collection({
+const gitHubUsers = new Collection({
 	schema: GitHubUserResponseSchema,
 })
 
@@ -13,7 +13,7 @@ const githubEmails = new Collection({
 	schema: GitHubEmailSchema,
 })
 
-export const mockGitHubUser = await githubUsers.create({
+export const mockGitHubUser = await gitHubUsers.create({
 	id: 1,
 	login: 'kody',
 	name: 'Kody the Koala',

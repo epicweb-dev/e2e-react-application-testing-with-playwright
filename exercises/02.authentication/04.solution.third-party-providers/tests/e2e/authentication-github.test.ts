@@ -2,7 +2,7 @@ import { mockGitHubUser } from '#app/mocks/handlers.ts'
 import { createUser } from '#tests/db-utils.ts'
 import { test, expect } from '#tests/test-extend.ts'
 
-test('onboards a new GitHub user', async ({ navigate, page }) => {
+test('onboards a new GitHub user', async ({ app, navigate, page }) => {
 	await navigate('/login')
 	await page.getByRole('button', { name: 'Login with GitHub' }).click()
 
@@ -31,6 +31,7 @@ test('onboards a new GitHub user', async ({ navigate, page }) => {
 	await expect(
 		page.getByRole('link', { name: mockGitHubUser.name }),
 	).toBeVisible()
+	await expect(page.getByText('Thanks for signing up!')).toBeVisible()
 })
 
 test('authenticates an existing GitHub user', async ({ navigate, page }) => {

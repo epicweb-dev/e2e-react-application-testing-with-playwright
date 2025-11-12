@@ -3,11 +3,11 @@ node_modules
 
 /build
 /server-build
- 
+
 .cache
 
-/prisma/data.db
-/prisma/data.db-journal
+/prisma/*.db
+/prisma/*.db-journal
 /tests/prisma
 
 /test-results/

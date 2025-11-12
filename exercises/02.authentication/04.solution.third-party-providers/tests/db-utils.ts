@@ -1,3 +1,4 @@
+import { execSync } from 'node:child_process'
 import { faker } from '@faker-js/faker'
 import bcrypt from 'bcryptjs'
 import { UniqueEnforcer } from 'enforce-unique'
@@ -32,8 +33,6 @@ export function generateUserInfo(info?: Partial<TestUserInfo>): TestUserInfo {
 			.slice(0, 20)
 			.toLowerCase()
 			.replace(/[^a-z0-9_]/g, '_')
-
-	console.log({ username })
 
 	return {
 		username,
@@ -163,4 +162,19 @@ export async function getUserImages() {
 	)
 
 	return userImages
+}
+
+export function prepareTestDatabase(filePath: string) {
+	const env = {
+		...process.env,
+		DATABASE_URL: `file:${filePath}`,
+	}
+
+	execSync('npx prisma migrate reset --force --skip-seed', {
+		env,
+	})
+
+	execSync('npx prisma migrate deploy', {
+		env,
+	})
 }

@@ -1,5 +1,11 @@
 import { defineConfig, devices } from '@playwright/test'
 import 'dotenv/config'
+import { config } from 'dotenv'
+
+config({
+	path: new URL('.env.test', import.meta.url),
+	override: true,
+})
 
 const PORT = process.env.PORT || '3000'
 
@@ -31,16 +37,16 @@ export default defineConfig({
 		},
 	],
 
-	webServer: {
-		command: process.env.CI ? 'npm run start:mocks' : 'npm run dev',
-		port: Number(PORT),
-		reuseExistingServer: true,
-		stdout: 'pipe',
-		stderr: 'pipe',
-		env: {
-			PORT,
-			NODE_ENV: 'test',
-			DATABASE_PATH: 'file:./test.db',
-		},
-	},
+	// webServer: {
+	// 	command: process.env.CI ? 'npm run start:mocks' : 'npm run dev',
+	// 	port: Number(PORT),
+	// 	reuseExistingServer: true,
+	// 	stdout: 'pipe',
+	// 	stderr: 'pipe',
+	// 	env: {
+	// 		PORT,
+	// 		NODE_ENV: 'test',
+	// 		DATABASE_URL: process.env.DATABASE_URL,
+	// 	},
+	// },
 })
