@@ -1,13 +1,13 @@
+import * as fs from 'node:fs'
 import { execSync } from 'node:child_process'
 import { faker } from '@faker-js/faker'
 import bcrypt from 'bcryptjs'
 import { UniqueEnforcer } from 'enforce-unique'
-import { getPasswordHash } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
 
 const uniqueUsernameEnforcer = new UniqueEnforcer()
 
-interface TestUserInfo {
+export interface TestUserInfo {
 	username: string
 	name: string
 	email: string
@@ -38,27 +38,6 @@ export function generateUserInfo(info?: Partial<TestUserInfo>): TestUserInfo {
 		username,
 		name: info?.name || `${firstName} ${lastName}`,
 		email: info?.email || `${username}@example.com`,
-	}
-}
-
-export async function createUser(info?: Partial<TestUserInfo>) {
-	const userInfo = generateUserInfo(info)
-	const password = 'supersecret'
-	const user = await prisma.user.create({
-		data: {
-			...userInfo,
-			password: { create: { hash: await getPasswordHash(password) } },
-		},
-	})
-
-	return {
-		async [Symbol.asyncDispose]() {
-			await prisma.user.deleteMany({
-				where: { id: user.id },
-			})
-		},
-		...user,
-		password,
 	}
 }
 
@@ -170,9 +149,9 @@ export function prepareTestDatabase(filePath: string) {
 		DATABASE_URL: `file:${filePath}`,
 	}
 
-	execSync('npx prisma migrate reset --force --skip-seed', {
-		env,
-	})
+	if (fs.existsSync(filePath)) {
+		fs.unlinkSync(filePath)
+	}
 
 	execSync('npx prisma migrate deploy', {
 		env,

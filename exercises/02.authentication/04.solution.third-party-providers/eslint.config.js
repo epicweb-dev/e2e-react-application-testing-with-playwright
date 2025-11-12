@@ -8,7 +8,11 @@ export default [
 		files: ['**/tests/**/*.ts'],
 		rules: {
 			'react-hooks/rules-of-hooks': 'off',
-			'no-unused-vars': ['warning', { varsIgnorePattern: '^app$' }],
+			'no-unused-vars': ['warn', { argsIgnorePattern: '^app$' }],
+			'@typescript-eslint/no-unused-vars': [
+				'warn',
+				{ argsIgnorePattern: '^app$' },
+			],
 		},
 	},
 	{

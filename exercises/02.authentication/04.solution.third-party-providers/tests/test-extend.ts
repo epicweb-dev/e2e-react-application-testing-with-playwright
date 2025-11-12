@@ -1,5 +1,6 @@
 import { type AppProcess, defineLauncher } from '@epic-web/app-launcher'
 import { test as testBase, expect } from '@playwright/test'
+import { PrismaClient, type User } from '@prisma/client'
 import getPort from 'get-port'
 import {
 	definePersona,
@@ -9,14 +10,23 @@ import {
 import { href, type Register } from 'react-router'
 import { getPasswordHash } from '#app/utils/auth.server.ts'
 import { prisma } from '#app/utils/db.server.ts'
-import { generateUserInfo, prepareTestDatabase } from '#tests/db-utils'
+import {
+	generateUserInfo,
+	prepareTestDatabase,
+	type TestUserInfo,
+} from '#tests/db-utils'
 
 interface Fixtures {
 	app: AppProcess
+	databasePath: string
+	prisma: PrismaClient
 	navigate: <T extends keyof Register['pages']>(
 		...args: Parameters<typeof href<T>>
 	) => Promise<void>
 	authenticate: AuthenticateFunction<[typeof user]>
+	createUser: (
+		info?: Partial<TestUserInfo>,
+	) => Promise<AsyncDisposable & User & { password: string }>
 }
 
 const user = definePersona('user', {
@@ -54,6 +64,7 @@ const launcher = defineLauncher({
 	},
 	env({ context }) {
 		return {
+			NODE_ENV: 'test',
 			PORT: context.port.toString(),
 		}
 	},
@@ -66,10 +77,21 @@ const launcher = defineLauncher({
 })
 
 export const test = testBase.extend<Fixtures>({
-	async app({}, use, testInfo) {
+	async databasePath({}, use, testInfo) {
 		const databasePath = `./test-${testInfo.testId}.db`
+		await use(databasePath)
+	},
+	async prisma({ databasePath }, use) {
+		const prisma = new PrismaClient({
+			datasourceUrl: `file:${databasePath}`,
+		})
+		await use(prisma)
+		await prisma.$disconnect()
+	},
+	async app({ databasePath }, use) {
 		prepareTestDatabase(databasePath)
 
+		let a = performance.now()
 		/**
 		 * @todo No need to re-run the whole app on test re-runs.
 		 * Would be nice to spawn the app once, then reuse it across re-runs.
@@ -77,20 +99,44 @@ export const test = testBase.extend<Fixtures>({
 		 */
 		const app = await launcher.run({
 			env: () => ({
+				// Configure the app's Prisma client to use the scoped database.
 				DATABASE_URL: `file:${databasePath}`,
 			}),
 		})
+		console.log('APP RUNNING IN:', performance.now() - a)
 
 		await use(app)
 		await app.dispose()
 	},
-	async navigate({ page, app }, use) {
+	async navigate({ page, app, contextOptions }, use) {
 		await use(async (...args) => {
-			const url = new URL(href(...args), app.url)
+			const url = new URL(href(...args), app.url || contextOptions.baseURL)
 			await page.goto(url.href)
 		})
 	},
 	authenticate: combinePersonas(user),
+	async createUser({ prisma }, use) {
+		await use(async (info) => {
+			const userInfo = generateUserInfo(info)
+			const password = 'supersecret'
+			const user = await prisma.user.create({
+				data: {
+					...userInfo,
+					password: { create: { hash: await getPasswordHash(password) } },
+				},
+			})
+
+			return {
+				async [Symbol.asyncDispose]() {
+					await prisma.user.deleteMany({
+						where: { id: user.id },
+					})
+				},
+				...user,
+				password,
+			}
+		})
+	},
 })
 
 export { expect }
