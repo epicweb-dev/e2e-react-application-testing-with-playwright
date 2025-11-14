@@ -80,6 +80,8 @@ export const test = testBase.extend<Fixtures>({
 	async databasePath({}, use, testInfo) {
 		const databasePath = `./test-${testInfo.testId}.db`
 		await use(databasePath)
+
+		await testInfo.attach(databasePath, { path: databasePath })
 	},
 	async prisma({ databasePath }, use) {
 		const prisma = new PrismaClient({
