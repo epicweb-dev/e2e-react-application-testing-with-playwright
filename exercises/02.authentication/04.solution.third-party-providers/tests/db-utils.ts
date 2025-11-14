@@ -1,9 +1,8 @@
-import * as fs from 'node:fs'
 import { execSync } from 'node:child_process'
+import * as fs from 'node:fs'
 import { faker } from '@faker-js/faker'
 import bcrypt from 'bcryptjs'
 import { UniqueEnforcer } from 'enforce-unique'
-import { prisma } from '#app/utils/db.server.ts'
 
 const uniqueUsernameEnforcer = new UniqueEnforcer()
 
@@ -38,38 +37,6 @@ export function generateUserInfo(info?: Partial<TestUserInfo>): TestUserInfo {
 		username,
 		name: info?.name || `${firstName} ${lastName}`,
 		email: info?.email || `${username}@example.com`,
-	}
-}
-
-export async function createPasskey(input: {
-	id: string
-	userId: string
-	aaguid: string
-	publicKey: Uint8Array<ArrayBuffer>
-	counter?: number
-}) {
-	const passkey = await prisma.passkey.create({
-		data: {
-			id: input.id,
-			aaguid: input.aaguid,
-			userId: input.userId,
-			publicKey: input.publicKey,
-			backedUp: false,
-			webauthnUserId: input.userId,
-			deviceType: 'singleDevice',
-			counter: input.counter || 0,
-		},
-	})
-
-	return {
-		async [Symbol.asyncDispose]() {
-			await prisma.passkey.deleteMany({
-				where: {
-					id: passkey.id,
-				},
-			})
-		},
-		...passkey,
 	}
 }
 

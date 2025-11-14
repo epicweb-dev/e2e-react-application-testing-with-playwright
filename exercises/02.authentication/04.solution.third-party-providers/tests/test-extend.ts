@@ -1,6 +1,12 @@
 import { type AppProcess, defineLauncher } from '@epic-web/app-launcher'
+import { generateTOTP } from '@epic-web/totp'
 import { test as testBase, expect } from '@playwright/test'
-import { PrismaClient, type User } from '@prisma/client'
+import {
+	PrismaClient,
+	type Verification,
+	type Passkey,
+	type User,
+} from '@prisma/client'
 import getPort from 'get-port'
 import {
 	definePersona,
@@ -27,6 +33,17 @@ interface Fixtures {
 	createUser: (
 		info?: Partial<TestUserInfo>,
 	) => Promise<AsyncDisposable & User & { password: string }>
+	createVerification: (input: {
+		totp: Awaited<ReturnType<typeof generateTOTP>>
+		userId: string
+	}) => Promise<AsyncDisposable & Verification>
+	createPasskey: (input: {
+		id: string
+		userId: string
+		aaguid: string
+		publicKey: Uint8Array<ArrayBuffer>
+		counter?: number
+	}) => Promise<AsyncDisposable & Passkey>
 }
 
 const user = definePersona('user', {
@@ -78,10 +95,12 @@ const launcher = defineLauncher({
 
 export const test = testBase.extend<Fixtures>({
 	async databasePath({}, use, testInfo) {
-		const databasePath = `./test-${testInfo.testId}.db`
-		await use(databasePath)
+		const databaseName = `test-${testInfo.testId}.db`
+		const databasePath = new URL(`../prisma/${databaseName}`, import.meta.url)
+			.pathname
 
-		await testInfo.attach(databasePath, { path: databasePath })
+		await use(databasePath)
+		await testInfo.attach(databaseName, { path: databasePath })
 	},
 	async prisma({ databasePath }, use) {
 		const prisma = new PrismaClient({
@@ -134,6 +153,54 @@ export const test = testBase.extend<Fixtures>({
 				},
 				...user,
 				password,
+			}
+		})
+	},
+	async createPasskey({ prisma }, use) {
+		await use(async (input) => {
+			const passkey = await prisma.passkey.create({
+				data: {
+					id: input.id,
+					aaguid: input.aaguid,
+					userId: input.userId,
+					publicKey: input.publicKey,
+					backedUp: false,
+					webauthnUserId: input.userId,
+					deviceType: 'singleDevice',
+					counter: input.counter || 0,
+				},
+			})
+
+			return {
+				async [Symbol.asyncDispose]() {
+					await prisma.passkey.deleteMany({
+						where: {
+							id: passkey.id,
+						},
+					})
+				},
+				...passkey,
+			}
+		})
+	},
+	async createVerification({ prisma }, use) {
+		await use(async (input) => {
+			const { otp, ...totpConfig } = input.totp
+			const verification = await prisma.verification.create({
+				data: {
+					...totpConfig,
+					type: '2fa',
+					target: input.userId,
+				},
+			})
+
+			return {
+				async [Symbol.asyncDispose]() {
+					await prisma.verification.deleteMany({
+						where: { id: verification.id },
+					})
+				},
+				...verification,
 			}
 		})
 	},
