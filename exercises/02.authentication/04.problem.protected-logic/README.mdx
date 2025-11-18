@@ -1,0 +1,19 @@
+# Protected logic
+
+- Testing the logic behind authentication (e.g. user creating notes).
+
+## Your task
+
+👨‍💼 In this exercise, your task is to set up authentication for tests. To achieve that, you will be using a library called [Playwright Persona](https://github.com/kettanaito/playwright-persona). Please take a moment to read about it before continuing.
+
+🐨 Start by installing `playwright-persona` as a dependency in your project:
+
+```sh
+npm i playwright-persona -D
+```
+
+🐨 Next, head to <InlineFile file="./tests/test-extend.ts">`tests/test-extend.ts`</InlineFile> and follow the instructions to define user personas.
+
+🐨 Once you've defined the `user` persona and created the `authenticate()` fixture, continue to the <InlineFile file="./tests/e2e/notes-create.test.ts">`tests/e2e/notes-create.test.ts`</InlineFile> test suite and finish the test case here.
+
+Verify your solution by running the tests (`npm test`). The tests must pass!
