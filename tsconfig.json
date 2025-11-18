@@ -26,19 +26,22 @@
       "path": "exercises/02.authentication/01.solution.basic"
     },
     {
+      "path": "exercises/02.authentication/02.problem.2fa"
+    },
+    {
       "path": "exercises/02.authentication/02.solution.2fa"
+    },
+    {
+      "path": "exercises/02.authentication/03.problem.passkeys"
     },
     {
       "path": "exercises/02.authentication/03.solution.passkeys"
     },
     {
-      "path": "exercises/02.authentication/04.solution.third-party-providers"
+      "path": "exercises/02.authentication/04.problem.protected-logic"
     },
     {
-      "path": "exercises/02.authentication/05.problem.protected-logic"
-    },
-    {
-      "path": "exercises/02.authentication/05.solution.protected-logic"
+      "path": "exercises/02.authentication/04.solution.protected-logic"
     },
     {
       "path": "exercises/03.databases/04.problem.test-data"
