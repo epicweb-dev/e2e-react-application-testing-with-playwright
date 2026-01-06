@@ -10,7 +10,7 @@ test('authenticates using a email and password', async ({ navigate, page }) => {
 	await page.getByLabel('Password').fill(user.password)
 	await page.getByRole('button', { name: 'Log in' }).click()
 
-	await expect(page.getByText(user.name!)).toBeVisible()
+	await expect(page.getByRole('link', { name: user.name! })).toBeVisible()
 })
 
 test('displays an error message when authenticating with invalid credentials', async ({

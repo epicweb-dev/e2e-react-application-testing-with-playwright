@@ -3,7 +3,7 @@ import { test, expect } from '#tests/test-extend.ts'
 
 test('displays all user notes', async ({ navigate, authenticate, page }) => {
 	const { user } = await authenticate({ as: 'user' })
-	await using notes = await createNotes({
+	await using _ = await createNotes({
 		ownerId: user.id,
 		notes: [
 			{
@@ -19,11 +19,14 @@ test('displays all user notes', async ({ navigate, authenticate, page }) => {
 
 	await navigate('/users/:username/notes', { username: user.username })
 
+	/**
+	 * @todo Rewrite this by giving the `list` an accessible name. This locator is too vague.
+	 */
 	const noteLinks = page
 		.getByRole('main')
 		.getByRole('list')
 		.getByRole('listitem')
 		.getByRole('link')
 
-	await expect(noteLinks).toHaveText(notes.values.map((note) => note.title))
+	await expect(noteLinks).toHaveText(['First note', 'Second note'])
 })
