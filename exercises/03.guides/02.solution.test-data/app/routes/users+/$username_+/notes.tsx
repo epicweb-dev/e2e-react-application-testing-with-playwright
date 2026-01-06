@@ -61,7 +61,10 @@ export default function NotesRoute({ loaderData }: Route.ComponentProps) {
 								<Icon name="plus">New Note</Icon>
 							</NavLink>
 						) : null}
-						<ul className="overflow-x-hidden overflow-y-auto pb-12">
+						<ul
+							aria-label="Notes"
+							className="overflow-x-hidden overflow-y-auto pb-12"
+						>
 							{loaderData.owner.notes.map((note) => (
 								<li key={note.id} className="p-1 pr-0">
 									<NavLink

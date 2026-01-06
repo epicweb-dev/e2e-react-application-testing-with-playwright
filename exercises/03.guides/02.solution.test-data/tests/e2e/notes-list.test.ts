@@ -19,14 +19,7 @@ test('displays all user notes', async ({ navigate, authenticate, page }) => {
 
 	await navigate('/users/:username/notes', { username: user.username })
 
-	/**
-	 * @todo Rewrite this by giving the `list` an accessible name. This locator is too vague.
-	 */
-	const noteLinks = page
-		.getByRole('main')
-		.getByRole('list')
-		.getByRole('listitem')
-		.getByRole('link')
+	const notes = page.getByRole('list', { name: 'Notes' }).getByRole('link')
 
-	await expect(noteLinks).toHaveText(['First note', 'Second note'])
+	await expect(notes).toHaveText(['First note', 'Second note'])
 })
