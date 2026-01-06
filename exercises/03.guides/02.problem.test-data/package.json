@@ -1,5 +1,5 @@
 {
-  "name": "exercises_05.debugging_01.solution.ui-mode",
+  "name": "exercises_03.guides_02.problem.test-data",
   "private": true,
   "sideEffects": false,
   "type": "module",
@@ -115,7 +115,6 @@
   "devDependencies": {
     "@epic-web/config": "^1.20.1",
     "@faker-js/faker": "^9.7.0",
-    "@msw/playwright": "^0.4.2",
     "@playwright/test": "^1.52.0",
     "@react-router/dev": "^7.5.3",
     "@sly-cli/sly": "^2.1.1",

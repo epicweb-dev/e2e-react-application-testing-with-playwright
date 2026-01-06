@@ -44,40 +44,40 @@
       "path": "exercises/02.authentication/04.solution.protected-logic"
     },
     {
-      "path": "exercises/03.databases/04.problem.test-data"
+      "path": "exercises/03.guides/02.problem.test-data"
     },
     {
-      "path": "exercises/03.databases/04.solution.test-data"
+      "path": "exercises/03.guides/02.solution.test-data"
     },
     {
-      "path": "exercises/04.guides/01.problem.recording-tests"
+      "path": "exercises/03.guides/03.problem.recording-tests"
     },
     {
-      "path": "exercises/04.guides/01.solution.recording-tests"
+      "path": "exercises/03.guides/03.solution.recording-tests"
     },
     {
-      "path": "exercises/04.guides/02.problem.api-mocking"
+      "path": "exercises/03.guides/04.problem.api-mocking"
     },
     {
-      "path": "exercises/04.guides/02.solution.api-mocking"
+      "path": "exercises/03.guides/04.solution.api-mocking"
     },
     {
-      "path": "exercises/05.debugging/01.problem.ui-mode"
+      "path": "exercises/04.debugging/01.problem.ui-mode"
     },
     {
-      "path": "exercises/05.debugging/01.solution.ui-mode"
+      "path": "exercises/04.debugging/01.solution.ui-mode"
     },
     {
-      "path": "exercises/05.debugging/02.problem.trace-viewer"
+      "path": "exercises/04.debugging/02.problem.trace-viewer"
     },
     {
-      "path": "exercises/05.debugging/02.solution.trace-viewer"
+      "path": "exercises/04.debugging/02.solution.trace-viewer"
     },
     {
-      "path": "exercises/05.debugging/03.problem.live-debugging"
+      "path": "exercises/04.debugging/03.problem.live-debugging"
     },
     {
-      "path": "exercises/05.debugging/03.solution.live-debugging"
+      "path": "exercises/04.debugging/03.solution.live-debugging"
     }
   ]
 }
