@@ -14,6 +14,31 @@ npx playwright test --trace on
 npm test -- --trace on
 ```
 
+### Uploading traces on CI
+
+Don't forget to configure your CI pipeline to upload the generated traces (and other test artifacts) if your test job fails. Here's an example of how to do that using the `actions/upload-artfact` on GitHub Actions:
+
+```yml
+# .github/workflows/ci.yml
+
+jobs:
+	test:
+		steps:
+			- name: E2E tests
+				run: npm run test:e2e
+
+			- name: Upload test artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: ./test-results
+```
+
+- `if: failure()` makes sure that you only upload the artifacts on test failures;
+- `with.name` is an ID for the uploaded artifacts;
+- `with.path` is the path relative to the project's root where the generated artifacts are located. By default, Playwright emits them in the `./test-results` directory.
+
 ## Related materials
 
 - [Trace Viewer](https://playwright.dev/docs/trace-viewer)
