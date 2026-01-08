@@ -4,7 +4,7 @@ import { UniqueEnforcer } from 'enforce-unique'
 
 const uniqueUsernameEnforcer = new UniqueEnforcer()
 
-export function createUser() {
+export function generateUserInfo() {
 	const firstName = faker.person.firstName()
 	const lastName = faker.person.lastName()
 
