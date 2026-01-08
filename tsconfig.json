@@ -47,6 +47,9 @@
       "path": "exercises/02.authentication/04.solution.protected-logic"
     },
     {
+      "path": "exercises/03.guides/01.solution.mock-database"
+    },
+    {
       "path": "exercises/03.guides/02.problem.test-data"
     },
     {
