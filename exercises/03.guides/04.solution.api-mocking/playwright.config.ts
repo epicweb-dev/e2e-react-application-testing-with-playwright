@@ -22,6 +22,8 @@ export default defineConfig({
 		},
 	},
 
+	globalSetup: './playwright.setup.ts',
+
 	projects: [
 		{
 			name: 'chromium',
