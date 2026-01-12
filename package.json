@@ -2,7 +2,7 @@
   "name": "e2e-react-application-testing-with-playwright",
   "private": true,
   "epicshop": {
-    "title": "E2E React Application Testing with Playwright",
+    "title": "E2E React Testing with Playwright",
     "subtitle": "Test React applications end-to-end",
     "githubRepo": "https://github.com/epicweb-dev/e2e-react-application-testing-with-playwright",
     "instructor": {
