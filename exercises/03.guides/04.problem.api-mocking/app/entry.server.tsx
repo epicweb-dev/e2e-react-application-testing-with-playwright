@@ -74,7 +74,6 @@ export default async function handleRequest(...args: DocRequestArgs) {
 									'connect-src': [
 										MODE === 'development' ? 'ws:' : undefined,
 										process.env.SENTRY_DSN ? '*.sentry.io' : undefined,
-										'maps.googleapis.com',
 										"'self'",
 									],
 									'font-src': ["'self'"],
@@ -89,8 +88,8 @@ export default async function handleRequest(...args: DocRequestArgs) {
 								},
 							},
 						},
+						xFrameOptions: false,
 					})
-
 					resolve(
 						new Response(createReadableStreamFromReadable(body), {
 							headers: responseHeaders,

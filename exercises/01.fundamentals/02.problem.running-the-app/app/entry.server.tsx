@@ -88,6 +88,7 @@ export default async function handleRequest(...args: DocRequestArgs) {
 								},
 							},
 						},
+						xFrameOptions: false,
 					})
 
 					resolve(

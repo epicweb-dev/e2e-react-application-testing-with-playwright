@@ -88,8 +88,8 @@ export default async function handleRequest(...args: DocRequestArgs) {
 								},
 							},
 						},
+						xFrameOptions: false,
 					})
-
 					resolve(
 						new Response(createReadableStreamFromReadable(body), {
 							headers: responseHeaders,
