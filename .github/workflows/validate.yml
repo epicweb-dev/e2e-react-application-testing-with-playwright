@@ -40,7 +40,7 @@ jobs:
       - name: ⬣ ESLint
         run:
           echo "Linting disabled on CI because it does not work for some reason"
-        working-directory: ./workshop/${{ github.event.repository.name }}
+        working-directory: ./workshop
 
   deploy:
     name: 🚀 Deploy
