@@ -18,6 +18,10 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
+      - name: 🧰 Enable long paths on Windows
+        if: runner.os == 'Windows'
+        run: git config --system core.longpaths true
+
       - name: ⎔ Setup node
         uses: actions/setup-node@v4
         with:
