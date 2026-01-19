@@ -18,3 +18,4 @@ coverage
 .vitest-reports
 *.DS_Store
 **/playwright/.auth
+saved-playgrounds
