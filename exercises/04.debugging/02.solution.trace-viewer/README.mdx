@@ -1,8 +1,12 @@
 # Trace viewer
 
-Good job! 👏
+## Root cause
 
-Please wait for the others to finish so we could go through the solution to this exercise together.
+The root cause is the newsletter dialog popping up and _blocking user interaction_. But why can't we see that when running tests locally?
+
+![A screenshot of the Playwright UI mode showing the newsletter dialog blocking user interaction](/assets/04-02-solution-newsletter-dialog.png)
+
+Because the newsletter dialog renders _conditionally_. The `SHOW_NEWSLETTER_DIALOG` environmental variable that controls its rendering was incorrectly set to `true` on CI, causing only the remote test runs to fail. Luckily, we have access to the trace and can step through the test, including its visual history, and find the culprit in no time.
 
 ## Generating local traces
 

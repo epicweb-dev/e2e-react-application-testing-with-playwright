@@ -89,7 +89,7 @@ export default function NotesRoute({ loaderData }: Route.ComponentProps) {
 					<Outlet />
 				</div>
 			</div>
-			{ENV.SHOW_NEWSLETTER_DIALOG ? <NewsletterDialog /> : null}
+			{ENV.SHOW_NEWSLETTER_DIALOG === 'true' ? <NewsletterDialog /> : null}
 		</main>
 	)
 }
