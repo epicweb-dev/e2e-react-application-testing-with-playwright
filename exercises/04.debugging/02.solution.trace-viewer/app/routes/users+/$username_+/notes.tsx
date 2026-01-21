@@ -52,7 +52,10 @@ export default function NotesRoute({ loaderData }: Route.ComponentProps) {
 								{ownerDisplayName}'s Notes
 							</h1>
 						</Link>
-						<ul className="overflow-x-hidden overflow-y-auto pb-12">
+						<ul
+							aria-label="Notes"
+							className="overflow-x-hidden overflow-y-auto pb-12"
+						>
 							{isOwner ? (
 								<li className="p-1 pr-0">
 									<NavLink
