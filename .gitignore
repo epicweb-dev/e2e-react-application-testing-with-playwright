@@ -7,6 +7,7 @@ workspace/
 **/public/build
 **/playwright-report
 data.db
+test.db
 /playground
 **/tsconfig.tsbuildinfo
 **/*.tsbuildinfo
