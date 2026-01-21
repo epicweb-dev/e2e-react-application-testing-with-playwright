@@ -4,6 +4,21 @@
 
 While you were gone, I've added a <InlineFile file="./tests/e2e/notes-search.test.ts">new test case</InlineFile> to verify that user's notes can be found through the search. But something didn't go well... That test is failing!
 
+```
+Error: Displays the user notes page
+
+expect(locator).toBeVisible() failed
+
+Locator: getByRole('heading', { name: '3n_leilani_walker29\'s notes' })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Displays the user notes page with timeout 5000ms
+  - waiting for getByRole('heading', { name: '3n_leilani_walker29\'s notes' })
+```
+
 👨‍💼 In this one, your task is to debug the failing test and fix it. The thing is, the test case at hand has a number of different steps:
 
 1. Searching for the user in the search bar.
