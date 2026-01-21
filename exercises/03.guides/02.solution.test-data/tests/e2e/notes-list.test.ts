@@ -19,7 +19,10 @@ test('displays all user notes', async ({ navigate, authenticate, page }) => {
 
 	await navigate('/users/:username/notes', { username: user.username })
 
-	const notes = page.getByRole('list', { name: 'Notes' }).getByRole('link')
+	const notes = page
+		.getByRole('list', { name: 'Notes' })
+		.getByRole('listitem')
+		.getByRole('link')
 
 	await expect(notes).toHaveText(['First note', 'Second note'])
 })
