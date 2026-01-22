@@ -1,5 +1,11 @@
 node_modules
 
+# non-npm JavaScript lockfiles
+yarn.lock
+pnpm-lock.yaml
+bun.lock
+bun.lockb
+
 workspace/
 **/.cache/
 **/build/
@@ -19,3 +25,4 @@ coverage
 .vitest-reports
 *.DS_Store
 **/playwright/.auth
+saved-playgrounds
