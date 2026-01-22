@@ -5,10 +5,11 @@ test('logs out the user', async ({ authenticate, navigate, page }) => {
 
 	await navigate('/')
 
-	const userMenu = page.getByRole('link', { name: user.name! })
-	await userMenu.click()
-	await userMenu.getByRole('link', { name: 'Logout' }).click()
+	await page.getByRole('link', { name: user.name! }).click()
+
+	const userMenu = page.getByRole('menu', { name: user.name! })
+	await userMenu.getByRole('menuitem', { name: 'Logout' }).click()
 
 	await expect(userMenu).not.toBeVisible()
-	await expect(page.getByRole('link', { name: 'Login' })).toBeVisible()
+	await expect(page.getByRole('link', { name: 'Log in' })).toBeVisible()
 })
