@@ -15,7 +15,8 @@
     "dev:no-mocks": "cross-env NODE_ENV=development node ./server/dev-server.js",
     "format": "prettier --write .",
     "lint": "eslint .",
-    "setup": "npm run build && prisma migrate deploy && prisma generate --sql && playwright install",
+    "prisma:setup": "prisma migrate deploy && prisma generate --sql",
+    "setup": "npm run build && npm run prisma:setup && playwright install",
     "start": "cross-env NODE_ENV=production node .",
     "start:mocks": "cross-env NODE_ENV=production MOCKS=true tsx .",
     "test": "npx playwright test",
@@ -27,7 +28,7 @@
     "test:e2e:install": "npx playwright install --with-deps chromium",
     "typecheck": "react-router typegen && tsc",
     "validate": "run-p \"test -- --run\" lint typecheck test:e2e:run",
-    "post:playground": "npx react-router typegen && prisma migrate deploy && prisma generate --sql"
+    "post:playground": "npx react-router typegen && npm run prisma:setup"
   },
   "prettier": "@epic-web/config/prettier",
   "eslintIgnore": [
@@ -116,7 +117,7 @@
     "@epic-web/config": "^1.20.1",
     "@faker-js/faker": "^9.7.0",
     "@msw/playwright": "^0.4.2",
-    "@playwright/test": "^1.52.0",
+    "@playwright/test": "^1.57.0",
     "@react-router/dev": "^7.5.3",
     "@sly-cli/sly": "^2.1.1",
     "@testing-library/dom": "^10.4.0",

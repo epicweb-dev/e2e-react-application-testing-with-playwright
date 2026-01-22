@@ -1,9 +1,0 @@
-{
-  "name": "exercises_01.basics_01.solution.install-and-configure",
-  "scripts": {
-    "test:e2e": "playwright test"
-  },
-  "devDependencies": {
-    "@playwright/test": "^1.53.2"
-  }
-}

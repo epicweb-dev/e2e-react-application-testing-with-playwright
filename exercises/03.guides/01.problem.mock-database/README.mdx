@@ -1,0 +1,10 @@
+# Mock database
+
+- File-based mock database in SQLite.
+- Configuring environment to use a different `DATABASE_URL`.
+
+## Changes
+
+- Created `.env.test` and put a different `DATABASE_URL` there, pointing at `./prisma/test.db`.
+- Created `playwright.setup.ts` to (1) reset the test DB before the test run; (2) prepare the test database using the same `prisma:setup` script.
+- Configured `globalSetup` in `playwright.config.ts`.

@@ -27,6 +27,8 @@ export async function loader({ params }: Route.LoaderArgs) {
 }
 
 export default function NotesRoute({ loaderData }: Route.ComponentProps) {
+	console.log(JSON.stringify(ENV, null, 2))
+
 	const user = useOptionalUser()
 	const isOwner = user?.id === loaderData.owner.id
 	const ownerDisplayName = loaderData.owner.name ?? loaderData.owner.username
@@ -52,7 +54,10 @@ export default function NotesRoute({ loaderData }: Route.ComponentProps) {
 								{ownerDisplayName}'s Notes
 							</h1>
 						</Link>
-						<ul className="overflow-x-hidden overflow-y-auto pb-12">
+						<ul
+							aria-label="Notes"
+							className="overflow-x-hidden overflow-y-auto pb-12"
+						>
 							{isOwner ? (
 								<li className="p-1 pr-0">
 									<NavLink
@@ -86,7 +91,7 @@ export default function NotesRoute({ loaderData }: Route.ComponentProps) {
 					<Outlet />
 				</div>
 			</div>
-			{ENV.SHOW_NEWSLETTER_DIALOG ? <NewsletterDialog /> : null}
+			{ENV.SHOW_NEWSLETTER_DIALOG === 'true' ? <NewsletterDialog /> : null}
 		</main>
 	)
 }

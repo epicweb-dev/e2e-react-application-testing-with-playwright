@@ -1,0 +1,18 @@
+# Basic
+
+- Testing a basic (email+password) authentication.
+
+## Solution
+
+- Explain why `timeout` here is necessary:
+
+```ts
+	async verifySession({ page, session }) {
+		await page.goto('/')
+		await expect(page.getByText(session.user.name!)).toBeVisible({
+			timeout: 100,
+		})
+	},
+```
+
+Without it, the default Playwright timeout of 5s will make auth extremely slow.

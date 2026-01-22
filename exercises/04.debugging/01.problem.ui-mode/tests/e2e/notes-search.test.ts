@@ -7,7 +7,7 @@ test('navigates to the user note from the search results', async ({
 	page,
 }) => {
 	const { user } = await authenticate({ as: 'user' })
-	await using notes = await createNotes({
+	await using _ = await createNotes({
 		ownerId: user.id,
 		notes: [
 			{
@@ -38,11 +38,13 @@ test('navigates to the user note from the search results', async ({
 		'Displays the user notes page',
 	).toBeVisible()
 
-	await page.getByRole('link', { name: notes.values[0]!.title }).click()
+	await page
+		.getByRole('list', { name: 'Notes' })
+		.getByRole('link', { name: 'First note' })
+		.click()
+
 	await expect(
-		page
-			.getByRole('region', { name: 'First note' })
-			.getByText(notes.values[0]!.content),
+		page.getByRole('region', { name: 'First note' }).getByText('Hello world'),
 		'Displays the note contents',
 	).toBeVisible()
 })
