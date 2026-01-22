@@ -1,8 +1,15 @@
 # Live debugging
 
-Good job! 👏
+## Root cause
 
-Please wait for the others to finish so we could go through the solution to this exercise together.
+- The login button locator was wrong:
+
+```ts remove=1 add=2
+await expect(page.getByRole('link', { name: 'Login' })).toBeVisible()
+await expect(page.getByRole('link', { name: 'Log in' })).toBeVisible()
+```
+
+- Sometimes elements aren't where we think they are. Sometimes they lack accessibility or we use wrong locators. But sometimes we just make mistakes! No matter what happens, using a debugger is so helpful.
 
 ## Related materials
 
