@@ -1,7 +1,22 @@
 # Install & configure
 
-- Mention the explicit `workers` value in `playwright.config.ts`.
+## Summary
 
-Good job! 👏
+1. Install Playwright.
+1. Create `playwright.config.ts`.
+1. Specify `projects` using Chromium as the browser.
+1. Specify quality-of-life options like `fullyParallel` or `forbidOnly`.
+1. A brief mention of `workers` set to `1` on CI.
 
-Please wait for the others to finish so we could go through the solution to this exercise together.
+---
+
+1. Create a simple test at `./tests/epicweb.test.ts`.
+1. Test block structure (`test()`).
+1. The `page` fixture.
+1. Use `page.goto()` to visit pages (external and internal).
+1. Promise-based `expect()` assertions (retriability).
+
+---
+
+1. Add the `test:e2e` script in `package.json` that runs Playwright.
+1. Run the test via `npm run test:e2e`. See the result.

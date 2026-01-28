@@ -1,5 +1,21 @@
 # Protected logic
 
-Good job! 👏
+## Summary
 
-Please wait for the others to finish so we could go through the solution to this exercise together.
+1. Install `playwright-persona`. Why it's needed.
+1. In `test-extend.ts`, use `definePersona` to define a new authentication persona. Explain what a persona is and what steps it has when defining.
+1. Go through the `createSession`, `verifySession`, and `destroySession` implementation steps. Summarize when persona will call these methods during the test life-cycle.
+1. Create a new fixture called `authenticate` using the `combinePersonas` utility from `playwright-persona`.
+
+---
+
+1. Create a new test at `tests/e2e/notes-create.test.ts`.
+1. Use the new `authenticate` fixture to authenticate as a `user` persona. Get the returned `user` object to use its data in the test.
+1. Go to a protected route, e.g. to create a new note.
+1. Fill in the new note form and submit it.
+1. Verify the new note is visible and has the correct content.
+1. `npm run test:e2e:run`.
+
+---
+
+1. Talk a bit more about personas and testing authentication-dependent logic, how it differs from testing authentication itself (where you don't need personas).

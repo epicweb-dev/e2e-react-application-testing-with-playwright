@@ -1,1 +1,18 @@
 # Passkeys
+
+## Summary
+
+1. In `tests/db-utils.ts`, create a new utility `createPasskey`. It will only be responsible for storing the given passkey correctly in the database (that it belongs to the given user).
+1. Install `test-passkey`. We will use it to generate test passkeys faster for tests.
+1. Create a new test at `tests/e2e/authentication-passkeys.test.ts`.
+1. Add a test case for successful auth using passkeys. **Navigate to `/login` first. This is important**.
+1. Create a test passkey, create a test user. Use `createPasskey` to store the generated passkey in the database.
+1. Now, we need to tell Playwright how to handle passkeys. In the test, create the `createWebAuthnClient` function and go step-by-step.
+1. Use the created `createWebAuthnClient` function to tell the browser how to react to the passkey input prompt (to use our test passkey).
+1. Continue with the login flow. Verify the auth state.
+1. `npm run test:e2e:run`.
+
+---
+
+1. Add another test case for the error scenario.
+1. `npm run test:e2e:run`.

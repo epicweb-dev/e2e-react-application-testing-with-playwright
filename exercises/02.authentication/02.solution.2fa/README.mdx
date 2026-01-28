@@ -1,1 +1,22 @@
 # Two-factor authentication
+
+## Summary
+
+1. Install `@epic-web/totp`. We will use it to generate verification codes for our 2FA test.
+1. In `test/db-utils.ts`, create a new function called `createVerification`. Go through its implementation step-by-step.
+1. Add an `asyncDispose` symbol to auto-cleanup the test data when the test closure it garbage-collected.
+
+---
+
+1. Create a new test at `tests/e2e/authentication-2fa.test.ts`.
+1. Use the `createUser` utility to create a random user.
+1. Use the `generatTOTP` from `@epic-web/totp` to generate an OTP.
+1. Use the new `createVerification` utility to generate a verification code with the given OTP for the given test user.
+1. Go to the login page, log in using the credentials.
+1. Wait until the 2FA verification prompt becomes visible.
+1. Enter the generated verification code.
+1. Verify that the auth was successful by the visibility of the user profile link.
+
+---
+
+1. `npm run test:e2e:run`. to confirm.

@@ -1,4 +1,4 @@
-import { createNotes } from '#tests/e2e/utils'
+import { createNotes } from '#tests/db-utils.ts'
 import { test, expect } from '#tests/test-extend.ts'
 
 test('displays all user notes', async ({ navigate, authenticate, page }) => {

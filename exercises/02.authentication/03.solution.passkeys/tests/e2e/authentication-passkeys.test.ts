@@ -58,7 +58,7 @@ test('authenticates using an existing passkey', async ({ navigate, page }) => {
 
 	await page.getByRole('button', { name: 'Login with a passkey' }).click()
 
-	await expect(page.getByText(user.name!)).toBeVisible()
+	await expect(page.getByRole('link', { name: user.name! })).toBeVisible()
 })
 
 test('displays an error when authenticating via a passkey fails', async ({

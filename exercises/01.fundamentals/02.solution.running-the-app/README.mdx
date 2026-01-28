@@ -1,5 +1,21 @@
 # Running the app
 
-Good job! 👏
+## Summary
 
-Please wait for the others to finish so we could go through the solution to this exercise together.
+1. Introduce to the Epic Stack app, briefly.
+
+---
+
+1. Changes in `playwright.config.ts`, mainly:
+  1. `PORT` at which the app will be running. `use.baseURL` to we can use relative URLs in our tests. 
+  1. The `webServer` option to spawn our app and wait at the given `PORT`.
+  1. `reuseExistingServer` allows us to use an already running app locally for faster tests.
+  1. `testDir` set to `./tests/e2e` since our app now also has other types of tests.
+
+---
+
+1. New test at `tests/e2e/homepage.test.ts`. We need to test our app, not running `epicweb.dev`.
+1. The basic structure of the test remains the same though:
+  1. Visit the homepage `/` (since we enabled relative URLs).
+  1. Assert that the heading text is visible to the user.
+1. Verify the test via `npm run test:e2e`.

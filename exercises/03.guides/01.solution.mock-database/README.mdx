@@ -1,1 +1,8 @@
 # Mock database
+
+## Summary
+
+1. Create the `.env.test` file and put a different `DATABASE_URL` there, pointing at `./prisma/test.db`.
+1. Create `playwright.setup.ts` to (1) reset the test DB before the test run; (2) prepare the test database using the same `prisma:setup` script.
+1. Edit `playwright.config.ts` to use the `playwright.setup.ts` as the `globalSetup` so Playwright knows when to run it.
+1. Run the existing tests (no test changes in this exercise). See the `prisma/test.db` written on disk. See how it _persists_ after the test run to help with debugging. Open and show what's been created as a part of this test run.
