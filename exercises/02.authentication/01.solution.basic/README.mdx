@@ -4,11 +4,16 @@
 
 ## Summary
 
+1. In `db-utils,` implement the `createUser` utility, following the steps.
+1. Mention the `asyncDispose` for clean up of the created user. Handy!
+1. `createUser` creates a _test_ user. You might've heard that "test users" should be avoided. Talk about the difference between the two (we aren't creating a user that acts and asserts on internals; "test user" simply means an actual user record we created for test purposes).
+
+---
+
 1. Create new test at `tests/e2e/authentication-basic.test.ts`.
 1. Create a new test case for successful authentication using email and password.
-1. In the test, use the existing `createUser()` utility, which generates a new user and creates it in the database.
+1. In the test, use the newly created `createUser()` utility, which generates a new user and creates it in the database.
 1. Log in by filling the log in form as the user would.
-1. Talk about _locators_ in Playwright. They are promises to values.
 1. Assert that the authentication is successful based on the user profile link being visible on the screen.
 1. `npm run test:e2e:run`.
 
