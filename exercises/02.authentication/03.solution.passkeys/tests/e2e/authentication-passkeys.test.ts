@@ -26,6 +26,8 @@ async function createWebAuthnClient(page: Page) {
 }
 
 test('authenticates using an existing passkey', async ({ navigate, page }) => {
+	await using user = await createUser()
+
 	await navigate('/login')
 
 	// Create a test passkey.
@@ -34,7 +36,6 @@ test('authenticates using an existing passkey', async ({ navigate, page }) => {
 	})
 
 	// Add the passkey to the server.
-	await using user = await createUser()
 	await using _ = await createPasskey({
 		id: passkey.credential.credentialId,
 		aaguid: passkey.credential.aaguid || '',
