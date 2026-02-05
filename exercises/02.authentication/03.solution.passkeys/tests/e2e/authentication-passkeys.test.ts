@@ -72,8 +72,10 @@ test('displays an error when authenticating via a passkey fails', async ({
 	await page.getByRole('button', { name: 'Login with a passkey' }).click()
 
 	await expect(
-		page.getByText(
-			'Failed to authenticate with passkey: The operation either timed out or was not allowed',
-		),
+		page
+			.getByRole('alert')
+			.getByText(
+				'Failed to authenticate with passkey: The operation either timed out or was not allowed',
+			),
 	).toBeVisible()
 })
