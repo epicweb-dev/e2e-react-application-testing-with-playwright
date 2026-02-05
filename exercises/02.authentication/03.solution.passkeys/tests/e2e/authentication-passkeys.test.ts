@@ -4,24 +4,23 @@ import { createPasskey, createUser } from '#tests/db-utils.ts'
 import { test, expect } from '#tests/test-extend.ts'
 
 async function createWebAuthnClient(page: Page) {
-	const client = await page.context().newCDPSession(page)
-	await client.send('WebAuthn.enable')
+	const session = await page.context().newCDPSession(page)
+	await session.send('WebAuthn.enable')
 
-	const result = await client.send('WebAuthn.addVirtualAuthenticator', {
+	const authenticator = await session.send('WebAuthn.addVirtualAuthenticator', {
 		options: {
 			protocol: 'ctap2',
 			transport: 'internal',
 			hasResidentKey: true,
 			hasUserVerification: true,
 			isUserVerified: true,
-			// Authenticator will automatically respond to the next prompt in the browser.
 			automaticPresenceSimulation: true,
 		},
 	})
 
 	return {
-		client,
-		authenticatorId: result.authenticatorId,
+		session,
+		authenticatorId: authenticator.authenticatorId,
 	}
 }
 
@@ -30,23 +29,19 @@ test('authenticates using an existing passkey', async ({ navigate, page }) => {
 
 	await navigate('/login')
 
-	// Create a test passkey.
 	const passkey = createTestPasskey({
 		rpId: new URL(page.url()).hostname,
 	})
 
-	// Add the passkey to the server.
 	await using _ = await createPasskey({
 		id: passkey.credential.credentialId,
+		userId: user.id,
 		aaguid: passkey.credential.aaguid || '',
 		publicKey: passkey.publicKey,
-		userId: user.id,
-		counter: passkey.credential.signCount,
 	})
 
-	// Add the passkey to the browser.
-	const { client, authenticatorId } = await createWebAuthnClient(page)
-	await client.send('WebAuthn.addCredential', {
+	const { session, authenticatorId } = await createWebAuthnClient(page)
+	await session.send('WebAuthn.addCredential', {
 		authenticatorId,
 		credential: {
 			...passkey.credential,
@@ -68,8 +63,8 @@ test('displays an error when authenticating via a passkey fails', async ({
 }) => {
 	await navigate('/login')
 
-	const { client, authenticatorId } = await createWebAuthnClient(page)
-	await client.send('WebAuthn.setUserVerified', {
+	const { session, authenticatorId } = await createWebAuthnClient(page)
+	await session.send('WebAuthn.setUserVerified', {
 		authenticatorId,
 		isUserVerified: false,
 	})
