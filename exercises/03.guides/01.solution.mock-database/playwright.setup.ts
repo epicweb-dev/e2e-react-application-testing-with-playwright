@@ -1,13 +1,11 @@
 import { spawnSync } from 'node:child_process'
 
 export default function globalSetup() {
-	spawnSync('npx', ['prisma', 'migrate', 'reset', '--force', '--skip-seed'], {
+	spawnSync('prisma', ['generate', '--sql'], {
 		stdio: 'inherit',
-		shell: true,
 	})
 
-	spawnSync('npm', ['run', 'prisma:setup'], {
+	spawnSync('prisma', ['migrate', 'reset', '--force', '--skip-seed'], {
 		stdio: 'inherit',
-		shell: true,
 	})
 }
