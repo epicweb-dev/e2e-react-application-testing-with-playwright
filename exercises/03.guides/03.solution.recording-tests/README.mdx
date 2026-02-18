@@ -2,4 +2,31 @@
 
 ## Summary
 
-1.
+1. Install the Playwright extension in VS Code. Show where and how.
+2. Showcase the extension in the sidebar once it's installed. See how it merges with the same extension from Vitest. Neat!
+
+---
+
+1. Before recording the tests, check the "Show browser" option in the "Settings" of the extension.
+2. Run the test. You can see that PW spawned in a headful mode, but the browser window doesn't close once the test is done. I will use that to record!
+3. Right-click on the test case in the list of tests and "Go to Test". The test case opens. Put the cursor at the blank space before the test's end.
+4. Finally, in the extension sidebar, click "Record at cursor".
+
+---
+
+1. In the browser window, notice how an UI overlay appeared. It has the controls to help with recording my interactions with the app.
+2. I scroll to the "Name" field on the page and change the user's name to "John Doe".
+3. I click "Save changes" the same way the user would.
+4. Now, let's verify that the change has been applied. I click on the user profile at the top right corner, then go to the "Profile" page.
+5. I can see the updated user name, but now I need to help Playwright see it also. In the overlay panel, I choose "Assert visibility" and click on the heading element with the updated user name.
+
+---
+
+1. Let's take a look at the recorded test. See how all my actions have been recorded, and the visibility assertion has been translated to the `expect` call.
+2. I'm done with the recording, so all I have to do is close the browser window.
+3. Now, let's run this test. Here's the result.
+
+---
+
+1. The role of the recording. It's a tool to make the process faster not to _replace_ the process. Playwright won't always output the best locators, and sometimes your app will be to blame. If you lack proper accessibility attributes, Playwright will have no choice but to resort to locating the elements by their DOM order, for example, which is less than ideal.
+2. Use the recording as a draft of the test. Polish it (or the app), introduce additional behaviors, like assertion messages or retryable assertions, and have yourself a great test done much faster.

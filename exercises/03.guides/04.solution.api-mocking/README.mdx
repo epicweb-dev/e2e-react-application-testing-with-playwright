@@ -1,8 +1,16 @@
 # API mocking
 
-Good job! 👏
+1. Install `msw` and `@msw/playwright` dependencies.
+2. Head to `tests/text-extend.ts` and in the `Fixtures` interface, describe a new fixture called `network`. Use the type from the `@msw/playwright` package to annotate it.
+3. Implement the `network` fixture. Use `defineNetworkFixture()` from the package, provide it with the handlers and the browser `context`. Start, use, and stop, awaited. Then, set `{ auto: true }` because I want for API mocking to always be applied, even if this fixture isn't explicitly used in a test.
+4. To make this fixture more flexible, I will create an option fixture called `handlers`. Annotate it as `Array<AnyHandler>`, then implement it as `[[], { option: true }]`. This way, individual tests and even entire test projects can define their own list of request handlers to affect the network.
 
-Please wait for the others to finish so we could go through the solution to this exercise together.
+---
+
+1. Now, let's use `network` in the test. Reference it and use `network.use()` to apply request handlers for the Google API requests I want to intercept.
+2. Respond with a mocked response (use the `HttpResponse` helper from `msw`).
+
+---
 
 ## Related materials
 

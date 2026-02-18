@@ -28,6 +28,7 @@ export function UserDropdown() {
 					>
 						<Img
 							className="size-8 rounded-full object-cover"
+							role="presentation"
 							alt={user.name ?? user.username}
 							src={getUserImgSrc(user.image?.objectKey)}
 							width={256}

@@ -213,7 +213,7 @@ export function ComboboxField({
 	labelProps: React.LabelHTMLAttributes<HTMLLabelElement>
 	inputProps: React.TextareaHTMLAttributes<HTMLInputElement> & { key: any }
 	errors?: ListOfErrors
-	options: Array<{ label: string; value: string }>
+	options: Array<{ id: string | number; label: string; value: string }>
 	className?: string
 }) {
 	const fallbackId = useId()
@@ -230,7 +230,7 @@ export function ComboboxField({
 	const [query, setQuery] = useState<string>('')
 
 	const [filtered, setFiltered] = useState<
-		Array<{ label: string; value: string }>
+		Array<{ id: string | number; label: string; value: string }>
 	>([])
 
 	const filterOptions = useCallback(
@@ -285,7 +285,7 @@ export function ComboboxField({
 						<CommandList>
 							{filtered.map((option) => (
 								<CommandItem
-									key={option.value}
+									key={option.id}
 									value={option.value}
 									onSelect={() => {
 										control.change(option.value)

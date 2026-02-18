@@ -1,5 +1,5 @@
 import { http, HttpResponse } from 'msw'
-import { type GoogleFindPlaceApiResponse } from '#app/routes/users+/$username_+/__note-editor.tsx'
+import { type NominatimSearchResponse } from '#app/routes/users+/$username_+/__note-editor.tsx'
 import { test, expect } from '#tests/test-extend.ts'
 
 test('displays location suggestions when creating a new note', async ({
@@ -9,21 +9,21 @@ test('displays location suggestions when creating a new note', async ({
 	page,
 }) => {
 	network.use(
-		http.get<never, never, GoogleFindPlaceApiResponse>(
-			'https://maps.googleapis.com/maps/api/place/findplacefromtext/json',
+		http.get<never, never, NominatimSearchResponse>(
+			'https://nominatim.openstreetmap.org/search',
 			() => {
-				return HttpResponse.json({
-					candidates: [
-						{
-							place_id: 'f02cda9e-d6d0-437b-9f82-1c5652e12af2',
-							formatted_address: 'San Francisco',
-						},
-						{
-							place_id: '77886276-dc77-4399-a39e-037378ac4c34',
-							formatted_address: 'San Jose',
-						},
-					],
-				})
+				return HttpResponse.json([
+					{
+						place_id: 1,
+						addresstype: 'city',
+						display_name: 'San Francisco',
+					},
+					{
+						place_id: 2,
+						addresstype: 'city',
+						display_name: 'San Jose',
+					},
+				])
 			},
 		),
 	)

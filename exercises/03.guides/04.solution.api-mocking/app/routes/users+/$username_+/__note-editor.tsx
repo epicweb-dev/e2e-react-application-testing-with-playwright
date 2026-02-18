@@ -57,12 +57,11 @@ export const NoteEditorSchema = z.object({
 	location: z.string().optional(),
 })
 
-export type GoogleFindPlaceApiResponse = {
-	candidates: Array<{
-		place_id: string
-		formatted_address: string
-	}>
-}
+export type NominatimSearchResponse = Array<{
+	addresstype: 'country' | 'city'
+	place_id: number
+	display_name: string
+}>
 
 export function NoteEditor({
 	note,
@@ -89,22 +88,23 @@ export function NoteEditor({
 	const imageList = fields.images.getFieldList()
 
 	const { data: locationSuggestions } = useQuery<
-		GoogleFindPlaceApiResponse | undefined
+		NominatimSearchResponse | undefined
 	>({
-		queryKey: ['location-suggestions'],
+		queryKey: ['location-suggestions', fields.location.value],
 		queryFn: async ({ signal }) => {
 			await new Promise((resolve) => setTimeout(resolve, 300))
 
 			if (!signal.aborted && fields.location.value) {
-				const url = new URL(
-					'https://maps.googleapis.com/maps/api/place/findplacefromtext/json',
-				)
-				url.searchParams.set('key', 'FOO')
-				url.searchParams.set('input', fields.location.value)
-				url.searchParams.set('inputtype', 'textquery')
-				url.searchParams.set('fields', 'place_id,formatted_address')
+				const url = new URL('https://nominatim.openstreetmap.org/search')
+				url.searchParams.set('q', fields.location.value)
+				url.searchParams.set('format', 'jsonv2')
 				const response = await fetch(url)
-				return response.json() as Promise<GoogleFindPlaceApiResponse>
+				const locations = (await response.json()) as NominatimSearchResponse
+				return locations.filter(
+					(location) =>
+						location['addresstype'] === 'city' ||
+						location['addresstype'] === 'country',
+				)
 			}
 		},
 		enabled: !!fields.location.value,
@@ -144,9 +144,10 @@ export function NoteEditor({
 						/>
 						<ComboboxField
 							options={
-								locationSuggestions?.candidates.map((candidate) => ({
-									label: candidate.formatted_address,
-									value: candidate.formatted_address,
+								locationSuggestions?.map((location) => ({
+									id: location.place_id,
+									label: location.display_name,
+									value: location.display_name,
 								})) || []
 							}
 							labelProps={{ children: 'Location' }}
