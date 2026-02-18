@@ -1,8 +1,15 @@
 # UI mode
 
-Good job! 👏
+1. Run the tests in the UI mode via `npm run test:e2e -- --ui`.
+2. See that it fails on the `getByRole('heading', { name: 'hv_nestor_windler70\'s notes' })` locator. Spot that in the UI, the heading element _is_ there, but it has a different text.
+3. Fix the issue with the locator in the test (`user.username` -> `user.name`).
+4. Rerun the test in the UI mode and see it passing.
 
-Please wait for the others to finish so we could go through the solution to this exercise together.
+---
+
+1. Practical use and application of the UI mode. When do you use it? How?
+2. UI mode is a debugging tool for you. It has no effect on CI, where tests run headless.
+3. Recommend creating a designated command for the `--ui` shortcut.
 
 ## Related materials
 
