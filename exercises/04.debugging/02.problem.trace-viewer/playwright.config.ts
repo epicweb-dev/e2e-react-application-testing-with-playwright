@@ -1,5 +1,12 @@
 import { defineConfig, devices } from '@playwright/test'
-import 'dotenv/config'
+import dotenv from 'dotenv'
+
+dotenv.config()
+
+dotenv.config({
+	path: new URL('./.env.test', import.meta.url),
+	override: true,
+})
 
 const PORT = process.env.PORT || '3000'
 
