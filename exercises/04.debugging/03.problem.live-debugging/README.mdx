@@ -11,7 +11,7 @@ Try running end-to-end tests now. Looks like the `logout.test.ts` is failing bec
 🐨 Now, it's time to break the failing test into steps (or breakpoints!). Right-click the gutter next to the action that clicks on the user menu and select the "Add Breakpoint" option from the context menu. This will add a breakpoint on that line, stopping the test execution when it reaches it.
 
 ```ts
-await userMenu.click()
+await page.getByRole('link', { name: user.name! }).click()
 ```
 
 🐨 In a similar way, add another breakpoint right when the test is clicking on the "Logout" link over here:
