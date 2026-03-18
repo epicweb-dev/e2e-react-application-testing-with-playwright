@@ -1,6 +1,6 @@
 import { test, expect } from '#tests/test-extend.ts'
 
-test('displays the welcome heading', async ({ navigate, page }) => {
+test('displays the welcome heading', async ({ page, navigate }) => {
 	await navigate('/')
 
 	await expect(

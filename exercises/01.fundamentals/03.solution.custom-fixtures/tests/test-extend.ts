@@ -8,7 +8,7 @@ interface Fixtures {
 }
 
 export const test = testBase.extend<Fixtures>({
-	async navigate({ page }, use) {
+	navigate: async ({ page }, use) => {
 		await use(async (...args) => {
 			await page.goto(href(...args))
 		})
