@@ -47,4 +47,7 @@ test('displays location suggestions when creating a new note', async ({
 
 	await page.getByRole('button', { name: 'Submit' }).click()
 	await expect(page.getByRole('heading', { name: 'My note' })).toBeVisible()
+	await expect(page.getByRole('note', { name: 'Location' })).toHaveText(
+		'San Francisco',
+	)
 })

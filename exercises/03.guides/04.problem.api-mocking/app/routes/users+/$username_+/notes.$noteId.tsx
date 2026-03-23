@@ -28,6 +28,7 @@ export async function loader({ params }: Route.LoaderArgs) {
 			id: true,
 			title: true,
 			content: true,
+			location: true,
 			ownerId: true,
 			updatedAt: true,
 			images: {
@@ -120,6 +121,17 @@ export default function NoteRoute({
 			<h2 id="note-title" className="text-h2 mb-2 pt-12 lg:mb-6">
 				{loaderData.note.title}
 			</h2>
+			{loaderData.note.location ? (
+				<Icon name="globe" className="text-foreground/60">
+					<p
+						role="note"
+						aria-label="Location"
+						className="text-foreground/60 text-sm font-medium"
+					>
+						{loaderData.note.location}
+					</p>
+				</Icon>
+			) : null}
 			<div className={`${displayBar ? 'pb-24' : 'pb-12'} overflow-y-auto`}>
 				<ul className="flex flex-wrap gap-5 py-5">
 					{loaderData.note.images.map((image) => (
