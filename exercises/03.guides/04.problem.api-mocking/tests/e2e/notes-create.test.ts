@@ -53,7 +53,7 @@ test('displays location suggestions when creating a new note', async ({
 	// 🐨 Assert that the full location name has been filled into the `locationInput`.
 	// 💰 expect(locator).toHaveValue(value)
 
-	// 🐨 CLick on the "Submit" button to create a new note.
+	// 🐨 Click on the "Submit" button to create a new note.
 
 	// 🐨 Finally, assert that a heading with the new note's title is visible on the page.
 	// 💰 expect(locator)toBeVisible()

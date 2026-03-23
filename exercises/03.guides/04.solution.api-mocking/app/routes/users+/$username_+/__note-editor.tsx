@@ -58,8 +58,8 @@ export const NoteEditorSchema = z.object({
 })
 
 export type NominatimSearchResponse = Array<{
-	addresstype: 'country' | 'city'
 	place_id: number
+	addresstype: 'country' | 'city'
 	display_name: string
 }>
 

@@ -30,13 +30,12 @@ test('displays location suggestions when creating a new note', async ({
 
 	const { user } = await authenticate({ as: 'user' })
 	await navigate('/users/:username/notes/new', { username: user.username })
+	await page.waitForLoadState('networkidle')
 
 	await page.getByLabel('Title').fill('My note')
 	await page.getByLabel('Content').fill('Hello world')
 
 	const locationInput = page.getByLabel('Location')
-	await locationInput.waitFor({ state: 'visible' })
-
 	await locationInput.fill('San')
 	await expect(page.getByRole('option')).toHaveText([
 		'San Francisco',
