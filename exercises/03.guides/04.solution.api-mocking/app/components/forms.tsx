@@ -12,7 +12,12 @@ import { Input } from './ui/input.tsx'
 import { Label } from './ui/label.tsx'
 import { Textarea } from './ui/textarea.tsx'
 import { cn } from '#app/utils/misc.tsx'
-import { Command, CommandItem, CommandList } from './ui/command.tsx'
+import {
+	Command,
+	CommandItem,
+	CommandList,
+	CommandListProps,
+} from './ui/command.tsx'
 
 export type ListOfErrors = Array<string | null | undefined> | null | undefined
 
@@ -206,12 +211,14 @@ export function CheckboxField({
 export function ComboboxField({
 	labelProps,
 	inputProps,
+	listboxProps = {},
 	errors,
 	options,
 	className,
 }: {
 	labelProps: React.LabelHTMLAttributes<HTMLLabelElement>
 	inputProps: React.TextareaHTMLAttributes<HTMLInputElement> & { key: any }
+	listboxProps?: CommandListProps
 	errors?: ListOfErrors
 	options: Array<{ id: string | number; label: string; value: string }>
 	className?: string
@@ -258,6 +265,8 @@ export function ComboboxField({
 			<Label htmlFor={id} {...labelProps} />
 			<Input
 				{...inputProps}
+				role="combobox"
+				aria-expanded={isListOpen ? 'true' : 'false'}
 				aria-invalid={errorId ? true : undefined}
 				aria-describedby={errorId}
 				autoComplete="off"
@@ -282,7 +291,7 @@ export function ComboboxField({
 			{isListOpen && filtered.length > 0 && (
 				<div className="bg-popover text-popover-foreground border-muted-foreground/60 absolute z-10 mt-1 w-full rounded-md border shadow">
 					<Command>
-						<CommandList>
+						<CommandList {...listboxProps}>
 							{filtered.map((option) => (
 								<CommandItem
 									key={option.id}

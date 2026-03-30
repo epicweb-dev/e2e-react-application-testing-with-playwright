@@ -155,6 +155,10 @@ export function NoteEditor({
 								...getInputProps(fields.location, { type: 'text' }),
 								placeholder: 'Select a location...',
 							}}
+							listboxProps={{
+								label: 'Location suggestions',
+								'aria-label': 'Location suggestions',
+							}}
 							errors={fields.location.errors}
 						/>
 						<div>

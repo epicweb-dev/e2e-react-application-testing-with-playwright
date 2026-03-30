@@ -37,10 +37,11 @@ test('displays location suggestions when creating a new note', async ({
 
 	const locationInput = page.getByLabel('Location')
 	await locationInput.fill('San')
-	await expect(page.getByRole('option')).toHaveText([
-		'San Francisco',
-		'San Jose',
-	])
+	await expect(
+		page
+			.getByRole('listbox', { name: 'Location suggestions' })
+			.getByRole('option'),
+	).toHaveText(['San Francisco', 'San Jose'])
 
 	await page.getByRole('option', { name: 'San Francisco' }).click()
 	await expect(locationInput).toHaveValue('San Francisco')

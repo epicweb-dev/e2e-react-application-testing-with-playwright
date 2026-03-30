@@ -80,10 +80,11 @@ function CommandInput({
 	)
 }
 
-function CommandList({
-	className,
-	...props
-}: React.ComponentProps<typeof CommandPrimitive.List>) {
+export type CommandListProps = React.ComponentProps<
+	typeof CommandPrimitive.List
+>
+
+function CommandList({ className, ...props }: CommandListProps) {
 	return (
 		<CommandPrimitive.List
 			data-slot="command-list"
