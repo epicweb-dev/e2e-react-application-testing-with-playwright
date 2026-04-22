@@ -1,6 +1,8 @@
 # Authentication
 
-- Authentication is both a feature to test and a prerequisite to test other features.
-- A login page example.
-- Users log in to _do_ something. Those actions treat authentication as a _given_.
-- In this block, you will learn how to test different authentication methods as well as how to provision authentication state as a part of your test setup.
+Authentication is an inseparable part of end-to-end tests just like it is an inseparable part of your applications. But there's a catch. Authentication encompases _two_ distinct areas from the testing perspective:
+
+- **Authentication as a feature**. These are the authentication options you provide to your users (e.g. email+password, 2FA, passkeys, third-party providers);
+- **Authentication as a dependency**. The functionality behind authentication (e.g. managing resources, performing authorized operations).
+
+In this block, you will learn about the difference between testing authentication as a feature and testing features that are behind authentication with Playwright.

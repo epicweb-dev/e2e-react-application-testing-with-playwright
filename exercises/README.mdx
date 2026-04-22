@@ -1,1 +1,31 @@
 # End-to-end React Testing with Playwright
+
+Hi :wave: Artem's here.
+
+Today, you and I are going to explore end-to-end tests. You know the type—expensive, slow, and unreliable. Only you won't be writing any of those. Instead, I will teach you how to use Playwright to test your web applications in a meaningful and performant way.
+
+## Exercises
+
+This workshop consists of four exercise blocks.
+
+### Fundamentals
+
+You will start by installing Playwright and covering the essential configuration options for a great testing experience both locally and on CI. You will get familiar with the test structure, using the `page` object, and why it gives you element _locators_ instead of direct DOM references. And you will wrap up by writing your own custom fixture for type-safe page navigation in your end-to-end tests.
+
+### Authentication
+
+In this one, you will learn the differnce between testing authentication as a feature and testing features that are _behind_ authentication (yes, those require entirely different approaches). You will write tests for the most common authentication methods in web applications:
+
+- **Basic**, where you will create a disposable `createUser()` utility that will create a test user in the database and delete it when the test is done;
+- **Two-factor Authentication**, where you will create test OTP tokens and store their verification records in the database for your test user;
+- **Passkeys**, where you will leverage a Chrome Developer Protocol session to create a web autnentication client with the passkey you provide and use it in your test.
+
+After that, you will explore how to create and manage authentication in your test setup using [Personas](https://github.com/kettanaito/playwright-persona)—reproducible snapshots of different authentication states that bridge the DX gap of `setStorageState` in Playwright.
+
+### Guides
+
+Next, you will dive straight into practical tips for writing end-to-end tests: from provisioning mock databases and test data to mocking client-side requests. As a bonus, I will show you how to write tests by recording your interactions in the browser using Playwright's extension for Visual Studio Code.
+
+### Debugging
+
+It's become somewhat of a tradition to include debugging techniques in my workshops, and this one will be no different. In the final section, you will master the UI mode to preview and debug your tests _visually_ and after that, learn how to debug failed CI tests with the Trace Viewer (this is, seriously, such a time-saver).
