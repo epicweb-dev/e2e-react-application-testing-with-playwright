@@ -1,3 +1,23 @@
 # Basic
 
-- Testing a basic (email+password) authentication.
+The most common authentication method you can find on the web is the one using email and password. This means that it's extremely likely to appear in your own apps in one form or another, which, in turn, makes it something you have to be comfortable with testing.
+
+## Your task
+
+👨‍💼 Here's your goal for this exercise: cover the basic authentication feature of the Epic Stack app with end-to-end tests (a happy path and a single error handling scenario will suffice). But before you can get to writing those, you have to _set things up_.
+
+🐨 In <InlineFile filename="./tests/db-utils.ts">`tests/db-utils.ts`</InlineFile>, follow the instructions to implement a `createUser()` helper utility. It will come in handy for creating test users in the database so you have the credentials to authenticate with during your test.
+
+🐨 Next, head to <InlineFile filename="./tests/e2e/authentication-basic.test.ts">`tests/e2e/authentication-basic.test.ts`</InlineFile> and write the first test case for a successful authentication flow. It will consist of:
+
+1. Using the `createUser()` utility to get test credentials;
+1. Navigating to the Login page;
+1. Filling in the login form with the said credentials;
+1. Submitting the form;
+1. And, finally, asserting that authentication-dependent UI is visible on the page.
+
+Verify your test as passing by running `npm run test:e2e`.
+
+🐨 Finally, add another test case in the same test file for the error handling during the authentication flow. To trigger it, simply try logging in with non-existing credentials and assert that a meaningful error message is presented to the user on the page.
+
+See you once you're done!

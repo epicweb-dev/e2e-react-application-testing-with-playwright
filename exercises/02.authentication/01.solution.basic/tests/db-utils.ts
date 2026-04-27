@@ -53,38 +53,6 @@ export async function createUser() {
 	}
 }
 
-export async function createPasskey(input: {
-	id: string
-	userId: string
-	aaguid: string
-	publicKey: Uint8Array
-	counter?: number
-}) {
-	const passkey = await prisma.passkey.create({
-		data: {
-			id: input.id,
-			aaguid: input.aaguid,
-			userId: input.userId,
-			publicKey: input.publicKey,
-			backedUp: false,
-			webauthnUserId: input.userId,
-			deviceType: 'singleDevice',
-			counter: input.counter || 0,
-		},
-	})
-
-	return {
-		async [Symbol.asyncDispose]() {
-			await prisma.passkey.deleteMany({
-				where: {
-					id: passkey.id,
-				},
-			})
-		},
-		...passkey,
-	}
-}
-
 export function createPassword(password: string = faker.internet.password()) {
 	return {
 		hash: bcrypt.hashSync(password, 10),
