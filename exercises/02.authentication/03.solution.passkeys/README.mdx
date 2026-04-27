@@ -1,18 +1,235 @@
 # Passkeys
 
-## Summary
+## `createPasskey()` utility
 
-1. In `tests/db-utils.ts`, create a new utility `createPasskey`. It will only be responsible for storing the given passkey correctly in the database (that it belongs to the given user).
-1. Install `test-passkey`. We will use it to generate test passkeys faster for tests.
-1. Create a new test at `tests/e2e/authentication-passkeys.test.ts`.
-1. Add a test case for successful auth using passkeys. **Navigate to `/login` first. This is important**.
-1. Create a test passkey, create a test user. Use `createPasskey` to store the generated passkey in the database.
-1. Now, we need to tell Playwright how to handle passkeys. In the test, create the `createWebAuthnClient` function and go step-by-step.
-1. Use the created `createWebAuthnClient` function to tell the browser how to react to the passkey input prompt (to use our test passkey).
-1. Continue with the login flow. Verify the auth state.
-1. `npm run test:e2e`.
+Let's start by arranging the server side of things, which consists of storing a passkey in the database.
 
----
+```ts filename=tests/db-utils.ts add=8-19
+export async function createPasskey(input: {
+	id: string
+	userId: string
+	aaguid: string
+	publicKey: Uint8Array<ArrayBuffer>
+	counter?: number
+}) {
+	const passkey = await prisma.passkey.create({
+		data: {
+			id: input.id,
+			aaguid: input.aaguid,
+			userId: input.userId,
+			publicKey: input.publicKey,
+			backedUp: false,
+			webauthnUserId: input.userId,
+			deviceType: 'singleDevice',
+			counter: input.counter || 0,
+		},
+	})
 
-1. Add another test case for the error scenario.
-1. `npm run test:e2e`.
+	return {
+		async [Symbol.asyncDispose]() {
+			await prisma.passkey.deleteMany({
+				where: {
+					id: passkey.id,
+				},
+			})
+		},
+		...passkey,
+	}
+}
+```
+
+Notice how the `createPasskey()` utility decouples the actual passkey (the `publicKey` in this case) from the storage mechanism. After all, it only needs the public part and the user context (`userId` and `aaguid`) to produce a valid record.
+
+Of course, on its own this isn't enough. Something has to actually _create_ that passkey for us to store. Where does it get from in a regular, non-test scenario? Well, it gets provided by the user! And in our case, it will get provided by the test user during the test.
+
+## Virtual Web Authenticator
+
+Before we get to the providing part though, we need to have something that would store our test passkeys in the browser. Luckily, we don't have to hack our way into that storage mechanism as the underlying APIs are exposed through the Chrome DevTools Protocol (CDP), which, in turn, is exposed to us by Playwright.
+
+We will create another helper utility called `createWebAuthnClient()` that will give us back a virtual authenticator session bound to the given page.
+
+```ts filename=tests/e2e/authentication-passkeys.test.ts
+async function createWebAuthnClient(page: Page) {
+	const session = await page.context().newCDPSession(page)
+	await session.send('WebAuthn.enable')
+
+	const authenticator = await session.send('WebAuthn.addVirtualAuthenticator', {
+		options: {
+			protocol: 'ctap2',
+			transport: 'internal',
+			hasResidentKey: true,
+			hasUserVerification: true,
+			isUserVerified: true,
+			automaticPresenceSimulation: true,
+		},
+	})
+
+	return {
+		session,
+		authenticatorId: authenticator.authenticatorId,
+	}
+}
+```
+
+> By setting the `automaticPresenceSimulation` option to `true`, we are selecting the added passkey in the authenticatior automatically, whereas the users would normally be presented with a blocking popup to choose their passkey.
+
+Here, we are enabling Web Authentication (`'WebAuthn.enable'`) and adding a new virtual authenticator (`WebAuthn.addVirtualAuthenticator`) by sending the respective messages to the CDP session. In return, we get:
+
+- `session`, the CDP session reference we can use in the test to store our test passkey in the browser;
+- `authenticatorId`, the reference to the virtual authenticator we've created so the browser knows where to store our passkeys.
+
+With that, let's write our first test case that focuses on the successful authentication flow.
+
+```ts filename=tests/e2e/authentication-passkeys.test.ts highlight=9-11,13-18,20-30
+import { createTestPasskey } from 'test-passkey'
+import { createPasskey, createUser } from '#tests/db-utils.ts'
+
+test('authenticates using an existing passkey', async ({ navigate, page }) => {
+	await using user = await createUser()
+
+	await navigate('/login')
+
+	const passkey = createTestPasskey({
+		rpId: new URL(page.url()).hostname,
+	})
+
+	await using _ = await createPasskey({
+		id: passkey.credential.credentialId,
+		userId: user.id,
+		aaguid: passkey.credential.aaguid || '',
+		publicKey: passkey.publicKey,
+	})
+
+	const { session, authenticatorId } = await createWebAuthnClient(page)
+	await session.send('WebAuthn.addCredential', {
+		authenticatorId,
+		credential: {
+			...passkey.credential,
+			isResidentCredential: true,
+			userName: user.username,
+			userHandle: btoa(user.id),
+			userDisplayName: user.name ?? user.email,
+		},
+	})
+
+	await page.getByRole('button', { name: 'Login with a passkey' }).click()
+
+	await expect(page.getByRole('link', { name: user.name! })).toBeVisible()
+})
+```
+
+### Creating a test passkey
+
+```ts filename=tests/e2e/authentication-passkeys.test.ts
+await navigate('/login')
+
+const passkey = createTestPasskey({
+	rpId: new URL(page.url()).hostname,
+})
+```
+
+We are using the `createTestPasskey()` function from the [`test-passkey`](https://github.com/kettanaito/test-passkey) package to create a realistic passkey bound to the given `rpId`—relying party ID—which is the hostname of the application for which the passkey is being issued.
+
+<callout-success>`rpId` is the integral part of preventing passkeys from being spoofed. Respect that and issue the test passkey specifically for your test application. For that, make sure you have already visited the application (`navigate()`) so `page.url()` would be an actual application URL and not just `about:blank`.</callout-success>
+
+### Storing the public key
+
+Now that we have a test `passkey`, let's store its public part on the server, using the `createTestPasskey()` utility we've created earlier.
+
+```ts filename=tests/e2e/authentication-passkeys.test.ts highlight=8-11
+const passkey = createTestPasskey({
+	rpId: new URL(page.url()).hostname,
+})
+
+// ...
+
+await using _ = await createPasskey({
+	id: passkey.credential.credentialId,
+	userId: user.id,
+	aaguid: passkey.credential.aaguid || '',
+	publicKey: passkey.publicKey,
+})
+```
+
+You can already spot the key-user collocation happening via `userId` and the passkey's `id` + `publicKey`.
+
+### Storing the private key
+
+Storing the private part of the test passkey will involve adding it to the virtual authenticator via the `createWebAuthnClient()` we've prepared.
+
+```ts filename=tests/e2e/authentication-passkeys.test.ts highlight=11,13-15
+const passkey = createTestPasskey({
+	rpId: new URL(page.url()).hostname,
+})
+
+// ...
+
+const { session, authenticatorId } = await createWebAuthnClient(page)
+await session.send('WebAuthn.addCredential', {
+	authenticatorId,
+	credential: {
+		...passkey.credential,
+		isResidentCredential: true,
+		userName: user.username,
+		userHandle: btoa(user.id),
+		userDisplayName: user.name ?? user.email,
+	},
+})
+```
+
+### Authenticating via passkeys
+
+All that remains now is to continue with the authentication flow, following the user's actions and describing the their expectations.
+
+```ts filename=tests/e2e/authentication-passkeys.test.ts
+await page.getByRole('button', { name: 'Login with a passkey' }).click()
+
+await expect(page.getByRole('link', { name: user.name! })).toBeVisible()
+```
+
+Yes, this is literally it. The test case itself is a two-liner that delegates all the heavy-lifting to the test setup.
+
+## Failed authentication flow
+
+Unlike the basic authentication, testing a failed passkey scenario will also require some test setup. If we omit the virtual authenticator entirely, the authentication flow will, indeed, fail, but not with an error the user ever be able to reproduce.
+
+To repvent that and tap into the actual user-facing failure, we will tap into the CDP once more and send the `'WebAuthn.setUserVerified'` directive, marking our virtual authenticatior as non-verified for usage.
+
+```ts filename=tests/e2e/authentication-passkeys.test.ts highlight=10
+test('displays an error when authenticating via a passkey fails', async ({
+	navigate,
+	page,
+}) => {
+	await navigate('/login')
+
+	const { session, authenticatorId } = await createWebAuthnClient(page)
+	await session.send('WebAuthn.setUserVerified', {
+		authenticatorId,
+		isUserVerified: false,
+	})
+
+	await page.getByRole('button', { name: 'Login with a passkey' }).click()
+
+	await expect(
+		page
+			.getByRole('alert')
+			.getByText(
+				'Failed to authenticate with passkey: The operation either timed out or was not allowed',
+			),
+	).toBeVisible()
+})
+```
+
+This reproduces a scenario when the selected passkey cannot be used for the given `rpId` (application), which allows us to assert on the appropriate error message being communicated to the user.
+
+## Running the tests
+
+```
+npm run test:e2e
+```
+
+## Related materials
+
+- [`test-passkey`](https://github.com/kettanaito/test-passkey)
+- [Authentication via passkeys (MDN)](https://developer.mozilla.org/en-US/docs/Web/Security/Authentication/Passkeys)
+- [Chrome DevTools Protocol](https://chromedevtools.github.io/devtools-protocol/)
