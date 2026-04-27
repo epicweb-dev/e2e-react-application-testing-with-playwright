@@ -6,7 +6,6 @@ test('authenticates using two-factor authentication', async ({
 	navigate,
 	page,
 }) => {
-	// Create a test user and enable 2FA for them directly in the database.
 	await using user = await createUser()
 	const totp = await generateTOTP()
 	await using _ = await createVerification({
@@ -14,7 +13,6 @@ test('authenticates using two-factor authentication', async ({
 		userId: user.id,
 	})
 
-	// Log in as the created user.
 	await navigate('/login')
 
 	await page.getByLabel('Username').fill(user.username)
