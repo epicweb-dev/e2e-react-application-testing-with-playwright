@@ -1,21 +1,79 @@
 # Running the app
 
-## Summary
+## The Epic Stack
 
-1. Introduce to the Epic Stack app, briefly.
+You have noticed that things have changed in your playground directory. That's because we have an entire Epic Stack application at our disposal now. It includes React components, routes, server handlers, database schemas... That is a _lot!_ But you don't have to know it in-and-out to test it efficiently on an end-to-end level. Those implementation details vanish entirely, and all that's left is a _real_ application that you will be interacting with inside your tests.
 
----
+But first, we need to tell Playwright to run it.
 
-1. Changes in `playwright.config.ts`, mainly:
-  1. `PORT` at which the app will be running. `use.baseURL` to we can use relative URLs in our tests. 
-  1. The `webServer` option to spawn our app and wait at the given `PORT`.
-  1. `reuseExistingServer` allows us to use an already running app locally for faster tests.
-  1. `testDir` set to `./tests/e2e` since our app now also has other types of tests.
+## Configuring `webServer`
 
----
+In `playwright.config.ts`, let's add a property `webServer` to our Playwright configuration, which will describe how our application should be spawned for testing.
 
-1. New test at `tests/e2e/homepage.test.ts`. We need to test our app, not running `epicweb.dev`.
-1. The basic structure of the test remains the same though:
-  1. Visit the homepage `/` (since we enabled relative URLs).
-  1. Assert that the heading text is visible to the user.
-1. Verify the test via `npm run test:e2e`.
+```ts filename=playwright.config.ts add=4-14
+export default defineConfig({
+	// ...
+
+	webServer: {
+		command: process.env.CI ? 'npm run start:mocks' : 'npm run dev',
+		port: Number(PORT),
+		reuseExistingServer: true,
+		stdout: 'pipe',
+		stderr: 'pipe',
+		env: {
+			PORT,
+			NODE_ENV: 'test',
+		},
+	},
+})
+```
+
+Here's what we are doing step-by-step:
+
+- `command` lists the exact command Playwright will run to spawn our app. Here, we are making it conditional, using `npm run start:mocks` on CI and `npm run dev` for local testing;
+- `port` is the port number where Playwright will expect the application to occupy. Once it sees something is running at that port, it will consider the application successfully spawned;
+- `reuseExistingServer` tells Playwright to reuse an application on the given `port` if it's already running. This is handy when running our end-to-end tests during development so we don't have to spawn _another_ app instance;
+- `stdout` and `stderr` are the quality-of-life options that `'pipe'` the standard output and errors, respectively, from the application's process to the test runner's process so we could observe them before, during, and after the test run;
+- `env`, as the name suggests, lists the environment variables we can provide to the application:
+  - `PORT` to spawn the application at the same port that Playwright expects it on;
+  - `NODE_ENV` as a flag that tells our app that it's being run for testing purposes.
+
+<callout-success>You can provide an array of web server configurations in the `webServer` option for Playwright to spawn _them all in parallel_ before the test run.</callout-success>
+
+## Writing tests
+
+From the test's perspective, not much will change. We still want to navigate to the page we want (the homepage), find the heading element, and make sure that it's visible to the user.
+
+```ts filename=tests/e2e/homepage.test.ts
+import { test, expect } from '@playwright/test'
+
+test('displays the welcome heading', async ({ page }) => {
+	await page.goto('/')
+
+	await expect(
+		page.getByRole('heading', { name: 'The Epic Stack' }),
+	).toBeVisible()
+})
+```
+
+Notice that I'm providing a _relative_ path to the homepage in `page.goto('/')`. How does Playwright know what to resolve it relatively to? It doesn't! I told it in `playwright.config.ts`:
+
+```ts filename=playwright.config.ts add=4-6
+export default defineConfig({
+	// ...
+
+	use: {
+		baseURL: `http://localhost:${PORT}/`,
+	},
+})
+```
+
+<callout-success>Playwright resolves any relative URLs against `use.baseURL`, if provided.</callout-success>
+
+## Running the test
+
+Finally, let's run the test to verify that our application is spawned correctly and all the instructions we have in our test run against that spawned instance.
+
+```
+npm run test:e2e
+```
