@@ -1,21 +1,278 @@
 # Protected logic
 
-## Summary
+## Authentication vs Authentication
 
-1. Install `playwright-persona`. Why it's needed.
-1. In `test-extend.ts`, use `definePersona` to define a new authentication persona. Explain what a persona is and what steps it has when defining.
-1. Go through the `createSession`, `verifySession`, and `destroySession` implementation steps. Summarize when persona will call these methods during the test life-cycle.
-1. Create a new fixture called `authenticate` using the `combinePersonas` utility from `playwright-persona`.
+This is not a typo. There are, in fact, _two_ types of authentication you will encounter when end-to-end testing your apps:
 
----
+1. Authentication as a feature;
+1. Authentication as a dependency for other features.
 
-1. Create a new test at `tests/e2e/notes-create.test.ts`.
-1. Use the new `authenticate` fixture to authenticate as a `user` persona. Get the returned `user` object to use its data in the test.
-1. Go to a protected route, e.g. to create a new note.
-1. Fill in the new note form and submit it.
-1. Verify the new note is visible and has the correct content.
-1. `npm run test:e2e`.
+### Authentication as a feature
 
----
+The purpose of the authentication feature is to allow the user to authenticate—provide their credentials to prove their identity in your system. All the various ways of authentication become different branches of the same feature. Your task here is to verify that every authentication option, every promise you make to your users functions as you think it does (by writing automated tests, of course).
 
-1. Talk a bit more about personas and testing authentication-dependent logic, how it differs from testing authentication itself (where you don't need personas).
+A typical authentication-as-a-feature test looks like this (in pseudo-code):
+
+```ts filename=authentication-as-a-feature.test.ts highlight=6-8
+test('authenticates using email and password', async () => {
+	// Setup.
+	await serverSideSetup()
+
+	// Actions.
+	await navigate('/login')
+	await fill(loginForm, values)
+	await submit()
+
+	// Assertions.
+	await expect(someUiState).toBeVisible()
+})
+```
+
+Going through the authentication flow is the inseparable part of this test because you want to make sure your users can also go through that same flow.
+
+### Authentication as a dependency
+
+Let's compare that with a test for a feature that depends on authentication:
+
+```ts filename=authentication-as-a-dependency.test.ts highlight=3
+test('publishes a new post', async () => {
+	// Setup.
+	await authenticate({ as: role })
+
+	// Action.
+	await navigate('/dashboard/posts')
+	await fill(newPostForm, values)
+	await submit()
+
+	// Assertions.
+	await expect(newPostHeading).toBeVisible()
+})
+```
+
+In order to publish a post, the user must be authenticated. That's your dependency over here. But notice how the authentication itself is _no longer the action the user performs_ in this test. Instead, it has become the _setup_ for it.
+
+This distinction is purely practical. The test case for publishing a post must assume a correctly authenticated user every time it runs. "_Given_ the user is authenticated..." It is crucial that any failures to `authenticate()` are reported as the setup errors, not action errors or, worse, failed assertions.
+
+## Playwright Persona
+
+It is not uncommon to assume different "personas" when testing authentication-dependent logic. A regular user. An admin. A legacy user. A banned user. All of those are personas that combine the authenticated state with the data state.
+
+Unfortunately, assuming those personas, just like working with authenticated state, doesn't have a first-class API in Playwright. Up until recently, Playwright had no APIs to get or store the current web storages and cookies state on disk (`setStorageState()` has been added in [March 2026](https://github.com/microsoft/playwright/issues/17389#issuecomment-4182828872); `getStorageState()` is still missing). But even if those APIs are present, they are rather low-level and do not tackle several aspects as authentication-as-a-dependency:
+
+- Persisted authentication state can become stale;
+- Authentication state/user persona collocation lacks an explicit contract;
+- No way to assume a persona on a test case basis, with the recommende way being establishing a dependency _between test projects_, treating a special test suite as a setup for another test suite.
+
+This is why I created a library called [Playwright Persona](https://github.com/kettanaito/playwright-persona). It uses the underlying low-level APIs in Playwright to provide a type-safe and ergonomic way of defining and assuming different authentication personas in tests. On top of that, it comes with automatic stale session invalidation and reusage of existing sessions for better test performance.
+
+### Installation
+
+First, let's install `playwright-persona` as a dependency:
+
+```sh
+npm i playwright-persona --save-dev
+```
+
+### Defining personas
+
+Let's define our first user persona, shall we?
+
+To do that, import the `definePersona()` function from `playwright-persona` and provide it with two arguments: the name of the persona and the persona options.
+
+```ts filename=tests/test-extend.ts
+import { definePersona } from 'playwright-persona'
+
+const user = definePersona('user', options)
+```
+
+> I will keep my authentication personas in the `test-extend.ts` file, but you can organize them in any way you see more fitting to your project.
+
+Every persona has life-cycle methods you can describe:
+
+- `createSession`, which describes what setup this persona needs and what actions must be performed in the UI to arrive at the authenticated state corresponding to this persona;
+- `verifySession`, which describes how to verify a persisted authenticated state;
+- `destroySession` (optional), which acts as a cleanup hook where you can delete any resources related to the current persona (i.e. user).
+
+Let's define how to create a session for our `user` persona:
+
+```ts filename=tests/test-extend.ts add=4-20
+import { definePersona } from 'playwright-persona'
+
+const user = definePersona('user', {
+	async createSession({ page }) {
+		const user = await prisma.user.create({
+			data: {
+				...createUser(),
+				roles: { connect: { name: 'user' } },
+				password: { create: { hash: await getPasswordHash('supersecret') } },
+			},
+		})
+
+		await page.goto('/login')
+		await page.getByLabel('Username').fill(user.username)
+		await page.getByLabel('Password').fill('supersecret')
+		await page.getByRole('button', { name: 'Log in' }).click()
+		await page.getByText(user.name!).waitFor({ state: 'visible' })
+
+		return { user }
+	},
+})
+```
+
+Notice how a single `createSession()` method combines the server-side resources this persona needs (creating the user record in the database) together with the actions performed to reproduce this authentication state (logging in with the created user's credentials).
+
+<callout-success>Persona methods, like `createSession()` and `verifySession()`, can use the `page` object to interact with the application the same way you can in your tests. But since those methods run during the setup phase, any exceptions they produce are reported as those happening during the setup.</callout-success>
+
+Next, we need to teach our persona to tell a fresh persisted session from a stale one. To do that, provide the `verifySession()` method on the persona's options:
+
+```ts filename=tests/test-extend.ts add=21-26
+import { definePersona } from 'playwright-persona'
+
+const user = definePersona('user', {
+	async createSession({ page }) {
+		const user = await prisma.user.create({
+			data: {
+				...createUser(),
+				roles: { connect: { name: 'user' } },
+				password: { create: { hash: await getPasswordHash('supersecret') } },
+			},
+		})
+
+		await page.goto('/login')
+		await page.getByLabel('Username').fill(user.username)
+		await page.getByLabel('Password').fill('supersecret')
+		await page.getByRole('button', { name: 'Log in' }).click()
+		await page.getByText(user.name!).waitFor({ state: 'visible' })
+
+		return { user }
+	},
+	async verifySession({ page, session }) {
+		await page.goto('/')
+		await expect(page.getByText(session.user.name!)).toBeVisible({
+			timeout: 100,
+		})
+	},
+})
+```
+
+Whatever session object you return from the `createSession()` method is exposed to other methods, including `verifySession()`. We can use that to describe context-aware actions to perform on the page _after_ the library restores a persisted authentication session from the disk but _before_ any of your tests run.
+
+Above, I'm using an assertion over the `session.user.name` text to be present on the page, implying the profile button in the top right corner. If it's present, the application digested the stored state correctly. If not, the state is likely obsolete and a new session must be created before continuing with the tests.
+
+<callout-success>Notice how I'm setting an explicitly shorter `timeout` on the `expect()` statement. The UI state I expect is a direct reflection of the hydrated session and is **not** eventual. The session is either immediately valid or it is not. There's no need to keep the retry for this `expect()`. That would only slow down the test.</callout-success>
+
+A really neat part of Playwright Persona is how it handles stale sessions (those where your `verifySession()` method errored):
+
+1. First, it runs the cleanup (`destroySession()`) with the _old_, stale session. This makes sure that no resources associated with that obsolete session survive in the database;
+1. Then, it automatically creates a _new_ session by calling `createSession()` and providing it to your tests.
+
+And, lastly, I will declare the `destroySession()` method where I will delete the test user once it's no longer needed.
+
+```ts filename=tests/test-extend.ts add=27-29
+import { definePersona } from 'playwright-persona'
+
+const user = definePersona('user', {
+	async createSession({ page }) {
+		const user = await prisma.user.create({
+			data: {
+				...createUser(),
+				roles: { connect: { name: 'user' } },
+				password: { create: { hash: await getPasswordHash('supersecret') } },
+			},
+		})
+
+		await page.goto('/login')
+		await page.getByLabel('Username').fill(user.username)
+		await page.getByLabel('Password').fill('supersecret')
+		await page.getByRole('button', { name: 'Log in' }).click()
+		await page.getByText(user.name!).waitFor({ state: 'visible' })
+
+		return { user }
+	},
+	async verifySession({ page, session }) {
+		await page.goto('/')
+		await expect(page.getByText(session.user.name!)).toBeVisible({
+			timeout: 100,
+		})
+	},
+	async destroySession({ session }) {
+		await prisma.user.deleteMany({ where: { id: session.user.id } })
+	},
+})
+```
+
+> The `destroySession()` method does **not** run after each test. It implements an **eventual** cleanup, which guarantees the deletion of stale resources while allowing us to reuse those sessions whose validity survives across tests and even test runs.
+
+### `authenticate()` fixture
+
+Remember our "fixture vs utility" rule? Well, authentication is as much about preparing the server-side resources as it is about interacting with the browser to actually authenticate. As such, it makes a nice candidate for a custom fixture!
+
+The `playwright-persona` package provides a shorthand utility called `combinePersonas` that will combine any given personas into a fixture for you.
+
+```ts filename=tests/test-extend.ts add=3-4,11,22
+import {
+	definePersona,
+	combinePersonas,
+	type AuthenticateFunction,
+} from 'playwright-persona'
+
+interface Fixtures {
+	navigate: <T extends keyof Register['pages']>(
+		...args: Parameters<typeof href<T>>
+	) => Promise<void>
+	authenticate: AuthenticateFunction<[typeof user]>
+}
+
+const user = definePersona('user', { ... })
+
+export const test = testBase.extend<Fixtures>({
+	async navigate({ page }, use) {
+		await use(async (...args) => {
+			await page.goto(href(...args))
+		})
+	},
+	authenticate: combinePersonas(user),
+})
+```
+
+## Assuming personas in a test
+
+Import the created `authenticate()` fixture in any test and call it, providing the persona name you wish to use in this test.
+
+```ts filename=tests/e2e/notes-create.test.ts  remove=3 add=4,5 highlight=7
+import { test, expect } from '#tests/test-extend.ts'
+
+test('creates a new note', async ({ navigate, page }) => {
+test('creates a new note', async ({ navigate, page, authenticate }) => {
+	const { user } = await authenticate({ as: 'user' })
+
+	await navigate('/users/:username/notes/new', { username: user.username })
+
+	await page.getByLabel('Title').fill('My new note')
+	await page.getByLabel('Content').fill('Hello world')
+	await page.getByRole('button', { name: 'Submit' }).click()
+
+	await expect(page.getByRole('heading', { name: 'My new note' })).toBeVisible()
+	await expect(
+		page.getByLabel('My new note').getByText('Hello world'),
+	).toBeVisible()
+})
+```
+
+Let's take a closer look at how the `authenticate()` fixture works.
+
+```ts
+const { user } = await authenticate({ as: 'user' })
+```
+
+You provide it an object as the argument with the `as` key equal to the _name_ of the persona you want to use. The values for the `as` key are type-safe and inferred from all the personas you provided to `combinePersonas()` function in your fixture definition.
+
+As a result, the fixture returns the _session object_. It's the same session object _you_ return from the `createSession()` method of your persona.
+
+## Persisting authentication state
+
+The authentication sessions created by `playwright-persona` are stored at the `./playwright/.auth` directory on your project's root.
+
+<callout-warning>I highly recommend you **ignore** the `/playwright/.auth` directory and its contents in Git. Authentication sessions contain sensitive information by design and should not be committed.</callout-warning>
+
+When it comes to CI, on the other hand, consider caching that directory (if the rest of your architecture accommodates for it) so the authentication state could persist across jobs, yielding faster test runs.

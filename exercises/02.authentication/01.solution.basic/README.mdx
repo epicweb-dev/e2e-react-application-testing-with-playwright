@@ -1,25 +1,111 @@
 # Basic
 
-- Testing a basic (email+password) authentication.
+## Implementing `createUser()`
 
-## Summary
+If we want to test authentication, we need to have some user credentials to authenticate with. This is where the `createUser()` utility function comes in as it will create a test user in the database and expose its credentials in the test.
 
-1. In `db-utils,` implement the `createUser` utility, following the steps.
-1. Mention the `asyncDispose` for clean up of the created user. Handy!
-1. `createUser` creates a _test_ user. You might've heard that "test users" should be avoided. Talk about the difference between the two (we aren't creating a user that acts and asserts on internals; "test user" simply means an actual user record we created for test purposes).
+```ts filename=tests/db-utils.ts
+export async function createUser() {
+	const userInfo = generateUserInfo()
+	const password = 'supersecret'
+	const user = await prisma.user.create({
+		data: {
+			...userInfo,
+			password: { create: { hash: await getPasswordHash(password) } },
+		},
+	})
 
----
+	return {
+		async [Symbol.asyncDispose]() {
+			await prisma.user.deleteMany({
+				where: { id: user.id },
+			})
+		},
+		...user,
+		password,
+	}
+}
+```
 
-1. Create new test at `tests/e2e/authentication-basic.test.ts`.
-1. Create a new test case for successful authentication using email and password.
-1. In the test, use the newly created `createUser()` utility, which generates a new user and creates it in the database.
-1. Log in by filling the log in form as the user would.
-1. Assert that the authentication is successful based on the user profile link being visible on the screen.
-1. `npm run test:e2e`.
+We are relying on the existing `generateUserInfo()` function to generate a `username` and `email`, providing a hard-coded password, and using the Prisma client to create the actual user record in the database.
 
----
+<callout-info>The way you approach creating test users will depend on your application.</callout-info>
 
-1. Another test case in the same file focused on displaying an error when authentication fails.
-1. Similar steps but _no setup_ so the user doesn't exist.
-1. Assert the error message being shown (correct _role_ and text).
-1. `npm run test:e2e`.
+Notice that apart from `user` and `password` our utility also returns a `Symbol.asyncDispose` function. That function marks the entire returned object as _disposable_, which we can leverage to have the cleanup (removing the test user) tied to when this function (and its surrounding scope) gets garbage collected.
+
+<callout-success>:scroll: [Disposable objects](https://www.epicweb.dev/better-test-setup-with-disposable-objects) are extremely handy for the test setup as they allow for collocation of the setup and cleanup logic. Do not sleep on them!</callout-success>
+
+## Fixtures vs utilities
+
+Okay, you are probably wondering: _Why isn't `createUser()` a fixture instead_?
+
+That's a great question. The truth is, it _can_ be a fixture, and nothing is stopping it from being one. As we've previously established, Playwright tests run in Node.js, which means our fixtures can tap into Node.js APIs and third-party packages relying on those.
+
+But I didn't make `createUser()` into a Playwright fixture for a reason. See, when it comes to deciding between custom fixtures and plain functions, I follow a simple logic:
+
+- If my utility function depends on the browser APIs or the test context, I make it a fixture;
+- If my utility function has nothing to do with the browser or Playwright, I keep it a separate function.
+
+Think back on our `navigate()` fixture. Its purpose is type-safety but its functionality is tightly coupled with the actual page navigation. Playwright already has an API for that—`page.goto()`. It would be rather cumbersome for me to trigger a page navigation from outside Playwright's context. So I make `navigate()` a fixture because it _directly benefits_ from easier access to Playwright APIs.
+
+`createUser()` though, not so much. It's a data seeding utility at its heart and has no dependency on Playwright or the browser whatsoever. As such, it doesn't belong in the fixtures.
+
+<callout-warning>Keep in mind that custom fixtures aren't free. By their very design, they are tightly coupled with Playwright, and Playwright dictates the way they are declared and used. This is not a matter of micro-optimization but instead a conscious design decision for your test setup to benefit from.</callout-warning>
+
+## Testing authentication
+
+Equipped with our fixtures and utilities, we can now write the first test case for the authentication flow.
+
+```ts filename=tests/e2e/authentication-basic.test.ts highlight=5,9-10,13
+import { createUser } from '#tests/db-utils.ts'
+import { test, expect } from '#tests/test-extend.ts'
+
+test('authenticates using a email and password', async ({ navigate, page }) => {
+	await using user = await createUser()
+
+	await navigate('/login')
+
+	await page.getByLabel('Username').fill(user.username)
+	await page.getByLabel('Password').fill(user.password)
+	await page.getByRole('button', { name: 'Log in' }).click()
+
+	await expect(page.getByRole('link', { name: user.name! })).toBeVisible()
+})
+```
+
+Testing authentication is no different from testing anything else on the page. We prepare our application (by creating a test user), visit the login page the user would visit, interact with it in the same manner, and expect UI elements confirming a successful (or failed) authentication that the user would expect.
+
+### Testing authentication failures
+
+Testing failure flows of any kind ties our test to the nature of that failure. The simplest way to illustrate that is to add a test case for a failed authentication flow due to the missing/invalid user credentials:
+
+```ts filename=tests/e2e/authentication-basic.test.ts highlight=7,8,11-13
+test('displays an error message when authenticating with invalid credentials', async ({
+	navigate,
+	page,
+}) => {
+	await navigate('/login')
+
+	await page.getByLabel('Username').fill('non_existing_user')
+	await page.getByLabel('Password').fill('non_existing_password')
+	await page.getByRole('button', { name: 'Log in' }).click()
+
+	await expect(
+		page.getByRole('alert').getByText('Invalid username or password'),
+	).toBeVisible()
+})
+```
+
+From the server's perspective, there is no distinction between missing or invalid credentials, so all we have to do to set up our application for this particular scenario is... nothing. We are not creating any test users because we don't need them.
+
+<callout-success>The most difficult part of arranging an end-to-end test is to understand the pieces involved in the behavior you're testing. Your test setup addresses the application side of it, tackling its complexity, while your test actions/assertions focus on the user-facing side.</callout-success>
+
+## Running the tests
+
+```
+npm run test:e2e
+```
+
+## Related materials
+
+- [Better Test Setup with Disposable Objects](https://www.epicweb.dev/better-test-setup-with-disposable-objects)

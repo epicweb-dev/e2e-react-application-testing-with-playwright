@@ -1,9 +1,123 @@
 # Custom fixtures
 
-## Summary
+## Type-safe navigation
 
-1. Implement the new `navigate` fixture in `tests/text-extend.ts`. Use generated type definitions from React Router for type-safe navigation in tests. Build the app to generate the type definitions.
-1. Change the existing test at `tests/e2e/homepage.test.ts` to use the new `navigate` fixture instead of `page`. Notice the route suggestions! Neat.
+It's important to understand that type-safe navigation is not a testing problem. It's an app problem. Just as you can make a mistake by visiting a non-existing page in your test, you can do something much worse—include a link to a non-exsisting page in your app and break your users' experience:
+
+```tsx
+<Link to="/hoempage" />
+```
+
+This is why every major web framework nowadays comes with type-safe routing. The latter is achieved by _generating type definitions_ for your routes and annotating your navigation-facing APIs, like `<Link />` or `href()`, with them.
+
+In React Router, those type definitions are generated at `.react-router/types/+routes.ts`:
+
+```ts filename=.react-router/types/+routes.ts
+type Pages = {
+	'/': {
+		params: {}
+	}
+	'/messages/:id': {
+		params: {
+			id: string
+		}
+	}
+}
+```
+
+We are going to benefit from these generated types in our tests, too!
+
+## Creating a fixture
+
+Rightfully, Playwright doesn't know what web framework you're using, if you're using one at all. It has no idea about the type definitions it generates. This is where we have to _teach it_, and we will do so by creating our custom fixture called `navigate()` that will replace `page.goto()` for navigations within our app.
+
+Create a file at `./tests/test-extend.ts` and declare a `Fixtures` interface in it. There, describe the `navigate` key with the type of a function mirroring the `href()` from `react-router`:
+
+```ts filename=tests/test-extend.ts highlight=4-6
+import { href, type Register } from 'react-router'
+
+interface Fixtures {
+	navigate: <T extends keyof Register['pages']>(
+		...args: Parameters<typeof href<T>>
+	) => Promise<void>
+}
+```
+
+> Here, we are using a _type argument_ `T` to infer all the keys (pathnames) from `Register['pages']` type in React Router and provide them to the `href<T>` parameters so the call signature of `navigate()` is the same as that of `href()`.
+
+Implementing a custom fixture means _extending the default `test()` function_ in Playwright. So let's import it first and call `.extend()` on it, assigning the result into a variable called `test` and exporting it:
+
+```ts filename=tests/test-extend.ts add=1,10-16
+import { test as testBase } from '@playwright/test'
+import { href, type Register } from 'react-router'
+
+interface Fixtures {
+	navigate: <T extends keyof Register['pages']>(
+		...args: Parameters<typeof href<T>>
+	) => Promise<void>
+}
+
+export const test = testBase.extend<Fixtures>({
+	navigate: async ({ page }, use) => {
+		await use(async (...args) => {
+			await page.goto(href(...args))
+		})
+	},
+})
+```
+
+Playwright fixtures follow a similar pattern as Vitest fixtures (that's not a coincidence):
+
+```ts
+{
+	[fixtureName]: (context, use) => {}
+}
+```
+
+In our navigate fixture, we are taking the `page` object from the test context and tapping into `page.goto()` to trigger the actual navigation in the test. The key here is that we are also using the `href()` function from `react-router` to actually _build_ the end URL we are naviugating to:
+
+```ts
+await page.goto(href(...args))
+```
+
+You can visualize the function invocation here like this:
+
+```
+navigate('/messages/:id', { id: '1' })
+	→ href('/messages/:id', { id: '1'} ) // "/messages/1"
+		→ page.goto('/messages/1')
+```
+
+Lastly, because we are going to be importing `test` from our `test-extend.ts` from now on, it would be great to also re-export the `expect` function for consistent and ergonomic imports in our tests:
+
+```ts filename=tests/test-extend.ts add=1,5
+import { test as testBase, expect } from '@playwright/test'
+
+// ...
+
+export { expect }
+```
+
+## Using custom fixtures
+
+Both built-in and custom fixtures in Playwright are accessed via the test context. What makes the custom fixtures work is that we are _replacing_ the default `test` function from `@playwright/test` with the one extended with our fixtures.
+
+```ts filename=tests/e2e/homepage.test.ts remove=1,4,6 add=2,5,7
+import { test, expect } from '@playwright/test'
+import { test, expect } from '#tests/test-extend.ts'
+
+test('displays the welcome heading', async ({ page }) => {
+test('displays the welcome heading', async ({ page, navigate }) => {
+	await page.goto('/')
+	await navigate('/')
+
+	await expect(
+		page.getByRole('heading', { name: 'The Epic Stack' }),
+	).toBeVisible()
+})
+```
+
+> Note that while it's technically possible to extend built-in fixtures, like `page.goto()`, you have to be mindful about the scope of your customization. Not every `page.goto()` call is a navigation within our app, but every `navigate()` call is.
 
 ## Related materials
 

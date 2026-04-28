@@ -1,15 +1,30 @@
 # Protected logic
 
-- Testing the logic behind authentication (e.g. user creating notes).
+Up to this point you have been testing authentication as a feature. That involved preparing the server-side state (e.g. creating test users, 2FA verifications, passkey records) and going through the login flow as they would.
+
+But your users log in into your app _to do something_. To post a message, edit an invoice, delete an item from their cart. All of those intentions they want to express live behind authentication, regardless of what authentication option they've chosen.
+
+In this one, you will learn how to test any behavior behind authentication using _personas_.
 
 ## Your task
 
-👨‍💼 In this exercise, your task is to set up authentication for tests. To achieve that, you will be using a library called [Playwright Persona](https://github.com/kettanaito/playwright-persona). Please take a moment to read about it before continuing.
+👨‍💼 The flow you will be testing in this exercise goes like this:
 
-🐨 Start by installing `playwright-persona` as a dependency in your project:
+1. Given the user is logged in;
+1. And they go to their "Notes" page;
+1. And create a new note;
+1. They should see that note in the list of their notes.
+
+You have already tackled every single step from this user scenario in the previous exercises, even if they took a slightly different shape.
+
+But this time, there's a catch.
+
+This time, you should _start_ from the authenticated state, treating it as a part of your test setup. And to help you with that, you will use a third-party library called [Playwright Persona](https://github.com/kettanaito/playwright-persona).
+
+🐨 First, install that library:
 
 ```sh
-npm i playwright-persona -D
+npm i playwright-persona --save-dev
 ```
 
 🐨 Next, head to <InlineFile file="./tests/test-extend.ts">`tests/test-extend.ts`</InlineFile> and follow the instructions to define user personas.

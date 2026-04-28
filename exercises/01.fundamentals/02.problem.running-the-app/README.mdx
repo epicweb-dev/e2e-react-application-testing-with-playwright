@@ -1,11 +1,13 @@
 # Running the app
 
+Alright, so you've got your first end-to-end test written, but it doesn't bring you much value yet (well, because Epic Web isn't the app you want to test!). Now is the time we change that.
+
 ## Your task
 
-👨‍💼 It's time for us to start testing _our_ app! But there's a couple of things you have to do before that.
+👨‍💼 Now is your turn to start testing _your_ app. But before you do that, you need to make sure Playwright runs it before your tests so they have something to interact with.
 
-🐨 First, let's make sure that Playwright runs your application before it runs your tests. Head to <InlineFile file="./playwright.config.ts">`playwright.config.ts`</InlineFile> and follow the instructions to configure the `webServer` property in Playwright's configuration.
+🐨 First, head to <InlineFile file="./playwright.config.ts">`playwright.config.ts`</InlineFile> and follow the instructions to configure the `webServer` property in Playwright's configuration. You will use that option to tell Playwright how to spawn your application.
 
-🐨 Now that `webServer` is configured, it's time to write some tests! Let's start from testing the homepage of the app. I've already got a test file prepared for you at <InlineFile file="./tests/e2e/homepage.test.ts">`tests/e2e/homepage.test.ts`</InlineFile>. Open that file and write a test case there.
+🐨 Next, once `webServer` is configured, write a simple test for the homepage at <InlineFile file="./tests/e2e/homepage.test.ts">`tests/e2e/homepage.test.ts`</InlineFile>. It will be quite similar to the test you've written in the previous exercise, but now interacting and asserting directly on your application.
 
-Once you're done, make sure that the added test is passing by running the `npm test` command in your terminal.
+And, of course, verify your solution by running the tests (`npm run test:e2e`) and seeing them pass.
