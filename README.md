@@ -26,14 +26,6 @@
 [![Code of Conduct][coc-badge]][coc]
 <!-- prettier-ignore-end -->
 
-## Prerequisites
-
-> TODO
-
-## Pre-workshop Resources
-
-> TODO
-
 ## System Requirements
 
 - [git][git] v2.18 or greater
