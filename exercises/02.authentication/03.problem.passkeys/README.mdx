@@ -1,9 +1,25 @@
 # Passkeys
 
+[Passkeys](https://developer.mozilla.org/en-US/docs/Web/Security/Authentication/Passkeys) is a type of a passwordless authentication that provides high security combined with great user experience. The user generates a passkey, then the browser stores its private part while the server stores the public one. Upon subsequent authentication, the browser-server exchange happens without any user involvement (e.g. having to enter a password), and as long as the user has a valid passkey on their device, they will be authenticated.
+
+So given how innately secure this authentication method is, how does one even test it?
+
 ## Your task
 
-- Write the `tests/e2e/authentication-passkey.test.ts` test suite.
-- Create a `createWebAuthnClient()` utility.
-- Install `test-passkey` as a dependency.
-- Create a `createPasskey()` utility.
-- Describe two test cases: successful and unsuccessul auth with passkeys.
+👨‍💼 Well, that is precisely your task in this exercise! And you problably already know what you're going to start with: the test setup. Passkeys introduce two additional elements to the flow:
+
+- The private key (the browser part);
+- The public key (the server part).
+
+Naturally, you'd have to create and store both of those in their correct places so the authentication could trigger as it normally does for your users.
+
+🐨 Start by writing a `createPasskey()` utility. This will be your helper to generate reliastic passkeys for your test users. It will involve using the `test-passkey` library to help you out with that.
+
+🐨 Then, in <InlineFile filename="./tests/e2e/authentication-passkeys.test.ts">`tests/e2e/authentication-passkeys.test.ts`</InlineFile>, work on another helper, this side for the browser side of things, called `createWebAuthnClient()`. You'll tap into Chrome DevTools Protocol and the underlying `WebAuthn` APIs to create a virtual authenticator to pair with your test passkey.
+
+🐨 And, finally, having all the pieces you need, write a few test cases covering the passkey authentication flow. You are primarily interested in the following:
+
+1. Successful authentication flow with a passkey;
+1. Failed authentication flow with a passkey (error handling).
+
+Give it your best and see you on the other side!

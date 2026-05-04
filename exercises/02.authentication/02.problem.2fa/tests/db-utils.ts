@@ -59,21 +59,20 @@ export async function createVerification(input: {
 	userId: string
 }) {
 	const { otp, ...totpConfig } = input.totp
-	const verification = await prisma.verification.create({
-		data: {
-			...totpConfig,
-			type: '2fa',
-			target: input.userId,
-		},
-	})
+
+	// 🐨 Create a new 2FA verification record in the database
+	// and store it in a variable called "verification".
+	// 💰 await prisma.verification.create({
+	//   data: { ...totpConfig, type: '2fa', target: input.userId }
+	// })
 
 	return {
 		async [Symbol.asyncDispose]() {
-			await prisma.verification.deleteMany({
-				where: { id: verification.id },
-			})
+			// 🐨 Delete the previously created verification record fr om
+			// 💰 await prisma.verification.deleteMany({ where: { ... } })
 		},
-		...verification,
+		// 🐨 Return the verification object by spreading it here.
+		// 💰 ...verification
 	}
 }
 

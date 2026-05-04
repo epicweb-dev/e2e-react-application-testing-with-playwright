@@ -1,15 +1,64 @@
 # UI mode
 
-1. Run the tests in the UI mode via `npm run test:e2e -- --ui`.
-2. See that it fails on the `getByRole('heading', { name: 'hv_nestor_windler70\'s notes' })` locator. Spot that in the UI, the heading element _is_ there, but it has a different text.
-3. Fix the issue with the locator in the test (`user.username` -> `user.name`).
-4. Rerun the test in the UI mode and see it passing.
+## Using UI mode
 
----
+Playwright comes with a UI mode built in. To run your tests in the UI mode, provide the `--ui` option to the `playwright test` command (or your custom script using it, like our `npm run test:e2e`):
 
-1. Practical use and application of the UI mode. When do you use it? How?
-2. UI mode is a debugging tool for you. It has no effect on CI, where tests run headless.
-3. Recommend creating a designated command for the `--ui` shortcut.
+```sh
+npm run test:e2e -- --ui
+```
+
+Running this will launch the UI mode window that's split into several panels:
+
+- The list of tests and test controls on the left;
+- The timeline at the top;
+- The "Actions" panel in the middle;
+- The browser preview on the right;
+- And a whole array of panels at the bottom ("Locator", "Source", "Call", etc).
+
+![A screenshot of the UI mode open, listing a single test](/images/04-01-ui-mode.png)
+
+All of those panels come into play when dealing with failing tests, just like the one we have on our hands right now.
+
+## Debugging the test
+
+If I run the test from the UI mode, I can see it failing at the following step:
+
+```
+Displays the user notes page
+getByRole("heading', { name: 'cp_cortez_ferry43\'s notes' })
+```
+
+But I can clearly see this element in the browser preview! For a quick sanity check, I grab the "Locator" tool from the browser preview panel and click on the problematic element. Playwright kindly prints its actual locator and the ARIA snapshot for me to explore:
+
+```
+getByRole('link', { name: 'Cortes Ferry\'s Notes' })
+
+- link "Cortez Ferry's Notes":
+	- /url: link:///users/cp_cortez_ferry43
+	- heading "Cortez Ferry's Notes" [level=1]
+```
+
+Aha! So it looks like I'm using `username` for this element's accessible name instead of `user.name` 🤦. A quick mistake that I can quickly fix in the test:
+
+```ts filename=tests/e2e/notes-search.test.ts remove=5 add=6
+// ...
+
+await page.getByRole('link', { name: 'My notes' }).click()
+await expect(
+	page.getByRole('heading', { name: `${user.username}'s notes` }),
+	page.getByRole('heading', { name: `${user.name}'s notes` }),
+	'Displays the user notes page',
+).toBeVisible()
+
+// ...
+```
+
+From within the same UI mode, I can rerun the test to confirm my fix and see it passing now!
+
+## UI mode in practice
+
+I highly recommend incorporating the UI mode into your testing workflow from day one. Not only is it a great debugging instrument, giving you an overview to, well, _everything_ that's happening in your tests, but it's a fantastic, visual way to get feedback as you're writing your tests as well.
 
 ## Related materials
 

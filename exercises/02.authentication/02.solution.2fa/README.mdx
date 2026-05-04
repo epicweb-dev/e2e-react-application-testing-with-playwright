@@ -1,22 +1,116 @@
 # Two-factor authentication
 
-## Summary
+The 2FA flow introduces a new element to authentication: One-Time Password. Unlike regular passwords, OTP doesn't get stored anywhere as that would defeat the point of the "One-Time" part. Instead, the server stores a _verification_ record associating a user with a _secret_ that can be used to check whether any OTP actually belongs to that user.
 
-1. Install `@epic-web/totp`. We will use it to generate verification codes for our 2FA test.
-1. In `test/db-utils.ts`, create a new function called `createVerification`. Go through its implementation step-by-step.
-1. Add an `asyncDispose` symbol to auto-cleanup the test data when the test closure it garbage-collected.
+Our test setup has to mirror this specifics if we want to achieve reliable test coverage.
 
----
+## `createVerification()` utility
 
-1. Create a new test at `tests/e2e/authentication-2fa.test.ts`.
-1. Use the `createUser` utility to create a random user.
-1. Use the `generatTOTP` from `@epic-web/totp` to generate an OTP.
-1. Use the new `createVerification` utility to generate a verification code with the given OTP for the given test user.
-1. Go to the login page, log in using the credentials.
-1. Wait until the 2FA verification prompt becomes visible.
-1. Enter the generated verification code.
-1. Verify that the auth was successful by the visibility of the user profile link.
+Just like creating test users with `createUser()`, the OTP verification record is one more server-side resource we need to seed for the test. To actually create OTP tokens, we are going to use a library called [`@epic-web/totp`](https://github.com/epicweb-dev/totp). This is _not_ a testing library. In fact, if you examine the authentication code for Epic Stack, you can quickly spot that we are using it to back up the actual authentication. This kind of reusage is most welcome in tests.
 
----
+```ts filename=test/db-utils.ts add=6-12,16-18
+export async function createVerification(input: {
+	totp: Awaited<ReturnType<typeof generateTOTP>>
+	userId: string
+}) {
+	const { otp, ...totpConfig } = input.totp
+	const verification = await prisma.verification.create({
+		data: {
+			...totpConfig,
+			type: '2fa',
+			target: input.userId,
+		},
+	})
 
-1. `npm run test:e2e`. to confirm.
+	return {
+		async [Symbol.asyncDispose]() {
+			await prisma.verification.deleteMany({
+				where: { id: verification.id },
+			})
+		},
+		...verification,
+	}
+}
+```
+
+> The exact shape of the verification record (`type`, `target`, etc.) is, once again, dictated by our application's architecture. Make sure your test setup reflects <u>**your**</u> application.
+
+## Testing Two-factor authentication
+
+With `createVerification()` ready, we've got all the pieces we need to put our application into the right state for testing the 2FA flow.
+
+```ts filename=tests/e2e/authentication-2fa.test.ts
+import { generateTOTP } from '@epic-web/totp'
+import { createUser, createVerification } from '#tests/db-utils.ts'
+import { test, expect } from '#tests/test-extend.ts'
+
+test('authenticates using two-factor authentication', async ({
+	navigate,
+	page,
+}) => {
+	// Setup.
+	await using user = await createUser()
+	const totp = await generateTOTP()
+	await using _ = await createVerification({
+		totp,
+		userId: user.id,
+	})
+
+	await navigate('/login')
+
+	// Actions.
+	await page.getByLabel('Username').fill(user.username)
+	await page.getByLabel('Password').fill(user.password)
+	await page.getByRole('button', { name: 'Log in' }).click()
+
+	// Assertions.
+	await expect(
+		page.getByRole('heading', { name: 'Check your 2FA app' }),
+	).toBeVisible()
+
+	// Actions.
+	await page
+		.getByRole('textbox', { name: /code/i })
+		.fill((await generateTOTP(totp)).otp)
+
+	await page.getByRole('button', { name: 'Submit' }).click()
+
+	// Assertions.
+	await expect(page.getByRole('link', { name: user.name! })).toBeVisible()
+})
+```
+
+Let's take a moment to appreciate how genuinely straightforward this test is. Despite tackling a rather complex flow, the test case itself reads not unlike a regular component test. **This is not a coincidence but a direct result of managing complexity through the test setup.**
+
+`createUser()` and `generateTOTP()` and `createVerification()` are complex functions doing complex things, but they aren't leaking any of that complexity into the test case. Instead, they encapsulate it in clean and understandable steps:
+
+1. Create a test user;
+1. Genereate a One-Time Password;
+1. Create a verification for this user and this OTP.
+
+They expose control while offloading the implementation details and the complexity behind them to the backstage—to the test setup—where it belongs. And they give you a nice eagle-eye overview of what this test case involves, which is also nice!
+
+The key part here is that once we arrive at the "Check your 2FA app" page, we enter a new TOTP the same way a user would open their password manager and copy-paste a new token into our app:
+
+```ts
+await expect(
+	page.getByRole('heading', { name: 'Check your 2FA app' }),
+).toBeVisible()
+
+await page
+	.getByRole('textbox', { name: /code/i })
+	.fill((await generateTOTP(totp)).otp)
+```
+
+The rest of this test case interacts with the application and asserts on the UI the same way we did in the previous tests and requires no further explanation.
+
+## Running tests
+
+```
+npm run test:e2e
+```
+
+## Related materials
+
+- [(Video) Dissecting Complexity in Tests](https://www.youtube.com/watch?v=nUozijHdgMM&t=419s)
+- [`@epic-web/totp`](https://github.com/epicweb-dev/totp)

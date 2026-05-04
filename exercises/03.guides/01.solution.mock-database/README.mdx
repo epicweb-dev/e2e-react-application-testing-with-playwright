@@ -1,11 +1,114 @@
 # Mock database
 
-## Summary
+## Test environment
 
-1. Create the `.env.test` file and put a different `DATABASE_URL` there, pointing at `./prisma/test.db`.
-   - `?connection_limit=1` is useful since SQLite locks the entire database during writes. This prevents race conditions in tests (one test tries to write to a db while it's locked due to a write from another test).
-1. Edit `playwright.config.ts` to add a new `dotenv.configure()` to load `.env.test` with `overrides: true`. This will point the test process to the correct env file.
-1. In `playwright.config.ts`, also set `webServer.env` (`DATABASE_URL: process.env.DATABASE_URL`) to use the correct test DB URL.
-1. Create `playwright.setup.ts` to (1) reset the test DB before the test run; (2) prepare the test database (generate client + apply the initial migrations).
-1. Edit `playwright.config.ts` to use the `playwright.setup.ts` as the `globalSetup` so Playwright knows when to run it.
-1. Run the existing tests (no test changes in this exercise). See the `prisma/test.db` written on disk. See how it _persists_ after the test run to help with debugging. Open and show what's been created as a part of this test run.
+While I want to set `DATABASE_URL` in `.env` to point to a test database file, I want for that logic to apply as an _override_ on top of the existing environment variables.
+
+I will start by creating `.env.test` at the root of the project and setting the `DATABASE_URL` variable to a different path:
+
+```dotenv filename=.env.test
+# foo
+DATABASE_URL="file:./test.db?connection_limit=1"
+```
+
+Here, the `file:` protocol instructs Prisma that my database is a file. `./test.db` describes a path to the database file relatiive to the `./prisma` directory. And, finally, I'm adding the `connection_limit` parameter with the value of `1` to prevent parallel database connections in SQLite so multiple tests don't attempt to read and write the same resources by accident.
+
+This completes the environment file and now I need to tell Playwright to use it.
+
+## Playwright configuration
+
+Right now, our tests are pulling the environment variables from `.env` because that's the default behavior of importing `dotenv/config`. I will opt out from it and describe which environment files are used in my tests, emphasizing where the overrides are.
+
+```ts filename=playwright.config.ts remove=2 add=3,5,7-10
+import { defineConfig, devices } from '@playwright/test'
+import 'dotenv/config'
+import dotenv from 'dotenv'
+
+dotenv.config()
+
+dotenv.config({
+	path: new URL('./.env.test', import.meta.url),
+	override: true,
+})
+```
+
+You can notice I have _two_ `dotenv.config()` calls now. The first one (without the arguments) replicates the previous default behavior of `dotenv/config` and loads the `.env` file. The second one describes the `path` to the environment file and uses `override: true` so the variables from `.env.test` would override the same-named variables from `.env`.
+
+This will provision the right environment for the test process, but the Prisma client in the spawned application will still read `DATABASE_URL` from `.env` (default behavior). I will change that by forwarding the `DATABASE_URL` value onto the `env` option of the application under test:
+
+```ts filename=playwright.config.ts add=15
+// ...
+
+export default defineConfig({
+	// ...
+
+	webServer: {
+		command: process.env.CI ? 'npm run start:mocks' : 'npm run dev',
+		port: Number(PORT),
+		reuseExistingServer: true,
+		stdout: 'pipe',
+		stderr: 'pipe',
+		env: {
+			PORT,
+			NODE_ENV: 'test',
+			DATABASE_URL: process.env.DATABASE_URL,
+		},
+	},
+})
+```
+
+## Global setup
+
+Something has to prepare our test database before the test run. That something will be a global setup in Playwright.
+
+In the `playwright.setup.ts` file, I will add the default `globalSetup()` function and first generate the Prisma client in it:
+
+```ts filename=playwright.setup.ts add=3-7
+import { spawnSync } from 'node:child_process'
+
+export default function globalSetup() {
+	spawnSync('prisma', ['generate', '--sql'], {
+		stdio: 'inherit',
+	})
+}
+```
+
+Next, I will reset the test database so every test run starts from a clean slate.
+
+```ts filename=playwright.setup.ts add=8-10
+import { spawnSync } from 'node:child_process'
+
+export default function globalSetup() {
+	spawnSync('prisma', ['generate', '--sql'], {
+		stdio: 'inherit',
+	})
+
+	spawnSync('prisma', ['migrate', 'reset', '--force', '--skip-seed'], {
+		stdio: 'inherit',
+	})
+}
+```
+
+> With these steps, I'm mirroring how my database is used in `package.json`. Take a peek there, if you're curious!
+
+And now to hook this global setup file in `playwright.config.ts`:
+
+```ts filename=playwright.config.ts add=5
+// ...
+
+export default defineConfig({
+	// ...
+	globalSetup: './playwright.setup.ts',
+	// ...
+})
+```
+
+## Benefits of separate databases
+
+It should come as no surprise to you that isolation is one of the fundamental principles of reliable automated testing. This is why we strive toward having no shared state between tests, why we reset our mocks and prepare designated test resources.
+
+Isolation on the database level is equally crucial. You want each test run to start from a clean, controlled state, and produce deterministic outcome. As a benefit, notice that in our setup, we are calling `prisma migrate reset` _before_ the test run and not after. This means that every test run ends with `test.db` you can observe and debug in case something went wrong.
+
+## Alternative approaches
+
+The approach we took to provision a test database today is undoubtedly specific to our architecture. It will differ if you using something else than Prisma, and it will _certainly_ differ if you are using a database that's not file-based.

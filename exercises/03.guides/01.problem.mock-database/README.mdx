@@ -1,4 +1,25 @@
 # Mock database
 
-- File-based mock database in SQLite.
-- Configuring environment to use a different `DATABASE_URL`.
+Applications need data and data needs to be stored somewhere. Even while you've been writing the tests during this workshop, with all the users and verifications and passkeys you've created, those records were stored in a database.
+
+But which exact database? We've never set anything up specifically for testing, right?
+
+No, not yet.
+
+Epic Stack uses SQLite, and any `prisma` call produced records in the same database instance used for development at `./prisma/data.db` (configured as `DATABASE_URL` in `.env`). On its own, this is not a mistake. For once, SQLite databases are _file-based_ so anything we read or write from our `data.db` is happening only on our local machine. Additionally, sharing the same database instance across development and testing can be quite beneficial as you can observe and interact with the test resources during development.
+
+But keeping your development and test databases separate is also beneficial. Let's explore why.
+
+## Your task
+
+👨‍💼 In this one, your task is to introduce a designated test database to be used in your end-to-end tests. As usual, it will take a couple of steps.
+
+🐨 First, start by introducing <InlineFile filename="./.env.test">`.env.test`</InlineFile>—an environment file specifically for Playwright tests.
+
+🐨 In `.env.test`, create an override for the `DATABASE_URL` variable and set its value to a test database (e.g. `file:./test.db`).
+
+🐨 Next, it's time to tell Playwright about these overrides. Head to <InlineFile filename="./laywright.config.ts">`playwright.config.ts`</InlineFile> and follow the instructions to apply `.env.test` file to your tests _and_ the tested application.
+
+🐨 And, finally, something has to initiate that test database before the tests run. You will tackle that in the newly created <InlineFile filename="./laywright.setup.ts">`playwright.setup.ts`</InlineFile> file by using the Prisma CLI to generate the client and reset the database before the tests.
+
+That's quite a lot, but I know you can manage this. I'm excited to go through the solution with you once you're done. Good luck!

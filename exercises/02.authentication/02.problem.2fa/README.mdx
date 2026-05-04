@@ -1,7 +1,13 @@
 # Two-factor authentication
 
+Two-factor authentication (2FA) is a common addition to any authentication flow. It exists as a separate, additional layer of identity verification not only to supplement authentication but also act as a guard for sensitive and destructive actions of already authenticated users. You've likely seen it in action in both of those ways.
+
+And now you're going to test it yourself.
+
 ## Your task
 
-- Write the `tests/e2e/authentication-2fa.test.ts`.
-- Implement a `createVerification()` utility.
-- Use `@epic-web/totp` to generate the OTP in the test case.
+👨‍💼 In this one, follow the instructions in <InlineFile filename="./tests/e2e/authentication-2fa.test.ts">`tests/e2e/authentication-2fa.test.ts`</InlineFile> to write an end-to-end test for the two-factor authentication flow in Epic Stack.
+
+🐨 Then, in addition to the `createUser()` utility you've prepared earlier, create another utility called `createVerification()` that would collocate a given user with a One-Time Password (OTP), storing that relationship in the database.
+
+🐨 And, finally, log in with the test user and fill in the OTP input that will appear now as a part of the authentication attempt. As always, have the test passing.

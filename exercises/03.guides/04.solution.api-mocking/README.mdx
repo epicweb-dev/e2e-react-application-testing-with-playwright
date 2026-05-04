@@ -1,16 +1,224 @@
 # API mocking
 
-1. Install `msw` and `@msw/playwright` dependencies.
-2. Head to `tests/text-extend.ts` and in the `Fixtures` interface, describe a new fixture called `network`. Use the type from the `@msw/playwright` package to annotate it.
-3. Implement the `network` fixture. Use `defineNetworkFixture()` from the package, provide it with the handlers and the browser `context`. Start, use, and stop, awaited. Then, set `{ auto: true }` because I want for API mocking to always be applied, even if this fixture isn't explicitly used in a test.
-4. To make this fixture more flexible, I will create an option fixture called `handlers`. Annotate it as `Array<AnyHandler>`, then implement it as `[[], { option: true }]`. This way, individual tests and even entire test projects can define their own list of request handlers to affect the network.
+First, I will install both `msw` and `@msw/playwright` as dependencies:
 
----
+```sh
+npm i msw @msw/playwright --save-dev
+```
 
-1. Now, let's use `network` in the test. Reference it and use `network.use()` to apply request handlers for the Google API requests I want to intercept.
-2. Respond with a mocked response (use the `HttpResponse` helper from `msw`).
+## Creating the `network` fixture
 
----
+In `tests/text-extend.ts`, I will add a new fixture to the `Fixtures` interface called `network`. As its type, I will use the `NetworkFixture` type exported from `@msw/playwright`.
+
+```ts filename=tests/text-extend.ts add=1,8
+import { type NetworkFixture } from '@msw/playwright'
+
+interface Fixtures {
+	navigate: <T extends keyof Register['pages']>(
+		...args: Parameters<typeof href<T>>
+	) => Promise<void>
+	authenticate: AuthenticateFunction<[typeof user]>
+	network: NetworkFixture
+}
+```
+
+Down below, in the `testBase.extend()` call, I will implement the `network` fixture like this:
+
+```ts filename=tests/text-extend.ts add=1,7-18
+import { type NetworkFixture } from '@msw/playwright'
+
+// ...
+
+export const test = testBase.extend<Fixtures>({
+	// ...
+	network: [
+		async ({ context }, use) => {
+			const network = defineNetworkFixture({
+				context,
+				handlers: [],
+			})
+			await network.enable()
+			await use(network)
+			await network.disable()
+		},
+		{ auto: true },
+	],
+})
+```
+
+The `defineNetworkFixture()` function from `@msw/playwright` configures the network object by accepting the browser `context` and a list of initial `handlers`.
+
+<callout-success>Notice the `auto: true` set for this fixture, which makes it automatic (gets applied to all tests regardless if they use it explicitly).</callout-success>
+
+## Using the `network` fixture
+
+Now, I can use the `network` fixture in my tests to describe what network behaviors I want. In my case, I want to intercept the request to the Nominatim suggestions service and respond to it with a mocked response.
+
+```ts filename=tests/e2e/notes-create.test.ts add=1,2,8,11-29
+import { http, HttpResponse } from 'msw'
+import { type NominatimSearchResponse } from '#app/routes/users+/$username_+/__note-editor.tsx'
+import { test, expect } from '#tests/test-extend.ts'
+
+test('displays location suggestions when creating a new note', async ({
+	authenticate,
+	navigate,
+	network,
+	page,
+}) => {
+	network.use(
+		http.get<never, never, NominatimSearchResponse>(
+			'https://nominatim.openstreetmap.org/search',
+			() => {
+				return HttpResponse.json([
+					{
+						place_id: 1,
+						addresstype: 'city',
+						display_name: 'San Francisco',
+					},
+					{
+						place_id: 2,
+						addresstype: 'city',
+						display_name: 'San Jose',
+					},
+				])
+			},
+		),
+	)
+})
+```
+
+With the `network.use()` call, I'm adding a per-test override with the list of request handlers describing my network. You can see a matching `http.get()` to the `https://nominatim.openstreetmap.org/search` endpoint, as well as the mocked `HttpResponse.json()` that will be used to respond to that request.
+
+## Completing the test
+
+With a reproduction network, I can complete the rest of the test, which will consist of me creating a new note and choosing one of the mocked location suggestions in the UI.
+
+```ts filename=tests/e2e/notes-create.test.ts add=27-49
+test('displays location suggestions when creating a new note', async ({
+	authenticate,
+	navigate,
+	network,
+	page,
+}) => {
+	network.use(
+		http.get<never, never, NominatimSearchResponse>(
+			'https://nominatim.openstreetmap.org/search',
+			() => {
+				return HttpResponse.json([
+					{
+						place_id: 1,
+						addresstype: 'city',
+						display_name: 'San Francisco',
+					},
+					{
+						place_id: 2,
+						addresstype: 'city',
+						display_name: 'San Jose',
+					},
+				])
+			},
+		),
+	)
+
+	const { user } = await authenticate({ as: 'user' })
+	await navigate('/users/:username/notes/new', { username: user.username })
+	await page.waitForLoadState('networkidle')
+
+	await page.getByLabel('Title').fill('My note')
+	await page.getByLabel('Content').fill('Hello world')
+
+	const locationInput = page.getByLabel('Location')
+	await locationInput.fill('San')
+	await expect(
+		page
+			.getByRole('listbox', { name: 'Location suggestions' })
+			.getByRole('option'),
+	).toHaveText(['San Francisco', 'San Jose'])
+
+	await page.getByRole('option', { name: 'San Francisco' }).click()
+	await expect(locationInput).toHaveValue('San Francisco')
+
+	await page.getByRole('button', { name: 'Submit' }).click()
+	await expect(page.getByRole('heading', { name: 'My note' })).toBeVisible()
+	await expect(page.getByRole('note', { name: 'Location' })).toHaveText(
+		'San Francisco',
+	)
+})
+```
+
+<callout-warning>Notice I'm using `await page.waitForLoadState('networkidle')` after the navigation. This prevents Playwright from proceeding with my test actions faster than the browser has a chance to load the client-side code responsible for the location suggestions.</callout-warning>
+
+## Creating a `handlers` option
+
+Providing request handlers in your test cases isn't the only way to control the network. In fact, you can benefit from Playwright's "option fixtures" that can be configured both on the test suite and a test project levels.
+
+To do that, let's add a new fixture called `handlers` to the `Fixtures` interface:
+
+```ts filename=tests/text-extend.ts add=1,9
+import { type AnyHandler } from 'msw'
+import { type NetworkFixture } from '@msw/playwright'
+
+interface Fixtures {
+	navigate: <T extends keyof Register['pages']>(
+		...args: Parameters<typeof href<T>>
+	) => Promise<void>
+	authenticate: AuthenticateFunction<[typeof user]>
+	handlers: Array<AnyHandler>
+	network: NetworkFixture
+}
+```
+
+And implement this fixture as an option by setting its `option` property to `true` during the fixture declaration:
+
+```ts filename=tests/text-extend.ts add=6
+// ...
+
+export const test = testBase.extend<Fixtures>({
+	// ..
+	//         👇 Default value.
+	handlers: [[], { option: true }],
+	//               👆 Fixture options.
+	// ..
+})
+```
+
+Now, you can provide the value for `handlers` on the test suite level via `test.use()`:
+
+```ts filename=some.test.ts
+test.use({
+	handlers: [http.get('/resource', resolver)],
+})
+
+test('...', () => {})
+```
+
+As well as on the test project level in your `playwright.config.ts`:
+
+```ts filename=tests/test-extend.ts add=3-5
+// ...
+
+export interface TestOptions {
+	handlers: Array<AnyHandler>
+}
+
+// ...
+```
+
+```ts filename=playwright.config.ts add=1,9
+import { type TestOptions } from './tests/test-extend'
+
+export default defineConfig<TestOptions>({
+	projects: [
+		{
+			name: 'chromium',
+			use: {
+				...devices['Desktop Chrome'],
+				handlers: [http.get('/resource', resolver)],
+			},
+		},
+	],
+})
+```
 
 ## Related materials
 

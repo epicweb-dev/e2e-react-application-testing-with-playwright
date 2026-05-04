@@ -1,5 +1,16 @@
 import { defineConfig, devices } from '@playwright/test'
+// 💣 Remove this import to opt out from the default "dotenv" behavior.
 import 'dotenv/config'
+
+// 🐨 Then, import the "dotenv" object from the "dotenv" package (notince the missing "/config").
+// 💰 import dotenv from 'dotenv'
+
+// 🐨 Call "dotenv.config()" to load the default environment file (".env").
+
+// 🐨 Add another "dotenv.config()" call. This time, provide it with these options:
+// - "path", a URL path to the ".env.test" file.
+// - "override", set to true to allow variables in ".env.test" to override those in ".env".
+// 💰 dotenv.config({ path: new URL('./path/here', import.meta.url), override: true })
 
 const PORT = process.env.PORT || '3000'
 

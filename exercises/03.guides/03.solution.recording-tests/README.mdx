@@ -1,32 +1,114 @@
 # Recording tests
 
-## Summary
+## Playwright extension
 
-1. Install the Playwright extension in VS Code. Show where and how.
-2. Showcase the extension in the sidebar once it's installed. See how it merges with the same extension from Vitest. Neat!
+The ability to record end-to-end tests is a part of the [Playwright's extension for Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=ms-playwright.playwright). Make sure to have it installed!
 
----
+## Recording tests
 
-1. Before recording the tests, check the "Show browser" option in the "Settings" of the extension.
-2. Run the test. You can see that PW spawned in a headful mode, but the browser window doesn't close once the test is done. I will use that to record!
-3. Right-click on the test case in the list of tests and "Go to Test". The test case opens. Put the cursor at the blank space before the test's end.
-4. Finally, in the extension sidebar, click "Record at cursor".
+There are a couple of thing I need to prepare before I record anything.
 
----
+First, is my test case. In `tests/e2e/profile-edit.test.ts`, I already have a test authenticated and waiting for me on the right page.
 
-1. In the browser window, notice how an UI overlay appeared. It has the controls to help with recording my interactions with the app.
-2. I scroll to the "Name" field on the page and change the user's name to "John Doe".
-3. I click "Save changes" the same way the user would.
-4. Now, let's verify that the change has been applied. I click on the user profile at the top right corner, then go to the "Profile" page.
-5. I can see the updated user name, but now I need to help Playwright see it also. In the overlay panel, I choose "Assert visibility" and click on the heading element with the updated user name.
+```ts filename=tests/e2e/profile-edit.test.ts
+import { test, expect } from '#tests/test-extend.ts'
 
----
+test('saves changes to the name of the user', async ({
+	navigate,
+	authenticate,
+	page,
+}) => {
+	await authenticate({ as: 'user' })
+	await navigate('/settings/profile')
+})
+```
 
-1. Let's take a look at the recorded test. See how all my actions have been recorded, and the visibility assertion has been translated to the `expect` call.
-2. I'm done with the recording, so all I have to do is close the browser window.
-3. Now, let's run this test. Here's the result.
+I will complete the rest of it by recording my interactions with the app in the actual browser.
 
----
+In the "Testing" tab added by the extension, I will check the "Show browser" option under "Settings". This will run my tests in a headful mode, showing me the browser window I will be interacting with.
 
-1. The role of the recording. It's a tool to make the process faster not to _replace_ the process. Playwright won't always output the best locators, and sometimes your app will be to blame. If you lack proper accessibility attributes, Playwright will have no choice but to resort to locating the elements by their DOM order, for example, which is less than ideal.
-2. Use the recording as a draft of the test. Polish it (or the app), introduce additional behaviors, like assertion messages or retryable assertions, and have yourself a great test done much faster.
+Let's make sure my cursor is placed where I want the recording output to be written in my test case:
+
+```ts filename=tests/e2e/profile-edit.test.ts
+test('saves changes to the name of the user', async ({
+	navigate,
+	authenticate,
+	page,
+}) => {
+	await authenticate({ as: 'user' })
+	await navigate('/settings/profile')
+
+	// <- Over here.
+})
+```
+
+Now, I will run my test. Immediately, I will see Playwright spawning the browser window with my application inside. It follows the steps I have outlined in my test case (authentication + navigation) and stops on the user profile page.
+
+![A screenshot of the automated browser window with the application open on the user profile page.](/images/03-03-headful-mode.png)
+
+I will head back to the extension panel and click "Record at cursor".
+
+Notice that once I do that, the browser window changes. There's a red overlay now, highlighting the elements under my cursor, and a control panel at the top that I can use to stop the recording, locate elements, assert visibility and text, and so on.
+
+![A screenshot of the automated browser window with the "Name" input highlighted in red, indicating a recording mode.](/images/03-03-recording-mode.png)
+
+With the recording running, I will enter a new name into the respective input in the UI and click the "Save changes" button to apply those changes. If I switch back to my test, I can see those interactions recorded by Playwright!
+
+```ts filename=tests/e2e/profile-edit.test.ts add=11-18
+import { test, expect } from '#tests/test-extend.ts'
+
+test('saves changes to the name of the user', async ({
+	navigate,
+	authenticate,
+	page,
+}) => {
+	await authenticate({ as: 'user' })
+	await navigate('/settings/profile')
+
+	await page.getByRole('textbox', { name: 'Username', exact: true }).click()
+	await page
+		.getByRole('textbox', { name: 'Username', exact: true })
+		.press('ControlOrMeta+a')
+	await page
+		.getByRole('textbox', { name: 'Username', exact: true })
+		.fill('John Doe')
+	await page.getByRole('button', { name: 'Save changes' }).click()
+})
+```
+
+This is neat! :tada:
+
+But the test doesn't end here. There's one important element missing—assertions. And I can record those, too.
+
+With my recording still running, I will head to the user menu and click on the "Profile" link. Now, on the profile page, I will click on the "Assert visibility" button in the control panel (the one with the eye icon) and click on the user name heading on the page. This will result in the following assertion being automatically added in my test:
+
+```ts filename=tests/e2e/profile-edit.test.ts add=19
+import { test, expect } from '#tests/test-extend.ts'
+
+test('saves changes to the name of the user', async ({
+	navigate,
+	authenticate,
+	page,
+}) => {
+	await authenticate({ as: 'user' })
+	await navigate('/settings/profile')
+
+	await page.getByRole('textbox', { name: 'Username', exact: true }).click()
+	await page
+		.getByRole('textbox', { name: 'Username', exact: true })
+		.press('ControlOrMeta+a')
+	await page
+		.getByRole('textbox', { name: 'Username', exact: true })
+		.fill('John Doe')
+	await page.getByRole('button', { name: 'Save changes' }).click()
+	await expect(page.getByRole('heading', { name: 'John Doe' })).toBeVisible()
+})
+```
+
+I can stop the recording now by clicking the "Stop recording" button in the control panel.
+
+## Practical usage
+
+Recording your tests can be really handy. Just keep in mind that it's meant to _suppliment_ your process, not replace it. Your involvement is still needed, and I encourage you to always review the recording results and _fine-tune them_ to match your quality criteria. Recordings may fail or be imprecise, and it is your responsibility to bring them to top shape.
+
+**Recorded tests are still <u>your</u> tests**.

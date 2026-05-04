@@ -1,9 +1,146 @@
 # Test data
 
-## Summary
+## `createNotes()` utility
 
-1. In `tests/db-utils.ts`, create a new utility called `createNotes`. Why.
-1. Complete the test at `tests/e2e/notes-list.test.ts`. Use the new `createNotes` utility to seed some notes for the tested user as a part of the test setup.
-1. Visit the page that lists all the user's notes.
-1. Assert that all the notes are visible. Accessibility!
-1. `npm run test:e2e`.
+I will start from implementing the `createNotes()` utility that will help me seed any notes for any user in tests.
+
+```ts filename=tests/db-utils.ts add=3-24
+// ...
+
+export async function createNotes(args: {
+	ownerId: string
+	notes: Array<Omit<Prisma.NoteCreateManyInput, 'ownerId'>>
+}) {
+	const notes = await prisma.note.createManyAndReturn({
+		data: args.notes.map((note) => {
+			return {
+				ownerId: args.ownerId,
+				...note,
+			}
+		}),
+	})
+
+	return {
+		async [Symbol.asyncDispose]() {
+			await prisma.note.deleteMany({
+				where: { ownerId: args.ownerId },
+			})
+		},
+		values: notes,
+	}
+}
+```
+
+Here, I'm implementing a utility not unlike `createUser()` or `createPasskey()` we've created before: a standalone function that uses the Prisma client to provision the server-side resources I need and returns a _disposable object_ that describes the cleanup.
+
+## Completing the test
+
+Now that I have the way to prepare the notes for any given user, I will head to the test file and use it to arrange my test:
+
+```ts filename=tests/e2e/notes-list.test.ts add=6-18
+import { createNotes } from '#tests/db-utils.ts'
+import { test, expect } from '#tests/test-extend.ts'
+
+test('displays all user notes', async ({ navigate, authenticate, page }) => {
+	const { user } = await authenticate({ as: 'user' })
+	await using _ = await createNotes({
+		ownerId: user.id,
+		notes: [
+			{
+				title: 'First Note',
+				content: 'Hello world',
+			},
+			{
+				title: 'Second Note',
+				content: 'Goodbye cosmos',
+			},
+		],
+	})
+})
+```
+
+This way, the authenticated user has two distinct note records in the database. Enough for me to assert them in the UI!
+
+Let's visit the notes page and make sure that those two notes are visible in the list of all user's notes:
+
+```ts filename=tests/e2e/notes-list.test.ts add=20,22-27
+import { createNotes } from '#tests/db-utils.ts'
+import { test, expect } from '#tests/test-extend.ts'
+
+test('displays all user notes', async ({ navigate, authenticate, page }) => {
+	const { user } = await authenticate({ as: 'user' })
+	await using _ = await createNotes({
+		ownerId: user.id,
+		notes: [
+			{
+				title: 'First Note',
+				content: 'Hello world',
+			},
+			{
+				title: 'Second Note',
+				content: 'Goodbye cosmos',
+			},
+		],
+	})
+
+	await navigate('/users/:username/notes', { username: user.username })
+
+	const notes = page
+		.getByRole('list', { name: 'Notes' })
+		.getByRole('listitem')
+		.getByRole('link')
+
+	await expect(notes).toHaveText(['First Note', 'Second Note'])
+})
+```
+
+This is a good start. Now, I will visit each note and make sure that its contents is correct:
+
+```ts filename=tests/e2e/notes-list.test.ts add=29-33,35-39
+import { createNotes } from '#tests/db-utils.ts'
+import { test, expect } from '#tests/test-extend.ts'
+
+test('displays all user notes', async ({ navigate, authenticate, page }) => {
+	const { user } = await authenticate({ as: 'user' })
+	await using _ = await createNotes({
+		ownerId: user.id,
+		notes: [
+			{
+				title: 'First Note',
+				content: 'Hello world',
+			},
+			{
+				title: 'Second Note',
+				content: 'Goodbye cosmos',
+			},
+		],
+	})
+
+	await navigate('/users/:username/notes', { username: user.username })
+
+	const notes = page
+		.getByRole('list', { name: 'Notes' })
+		.getByRole('listitem')
+		.getByRole('link')
+
+	await expect(notes).toHaveText(['First Note', 'Second Note'])
+
+	await notes.getByText('First Note').click()
+	await expect(page.getByRole('heading', { name: 'First Note' })).toBeVisible()
+	await expect(
+		page.getByLabel('First Note').getByText('Hello world'),
+	).toBeVisible()
+
+	await notes.getByText('Second Note').click()
+	await expect(page.getByRole('heading', { name: 'Second Note' })).toBeVisible()
+	await expect(
+		page.getByLabel('Second Note').getByText('Goodbye cosmos'),
+	).toBeVisible()
+})
+```
+
+And, of course, let's run the tests to see them passing.
+
+```sh
+npm run test:e2e
+```
