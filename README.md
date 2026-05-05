@@ -1,5 +1,5 @@
 <div align="center">
-  <h1><a href="https://www.epicweb.dev/workshops">End-to-End React Application Testing with Playwright</a></h1>
+  <h1><a href="https://www.epicweb.dev/workshops">React End-to-End Testing with Playwright</a></h1>
   <strong>
   </strong>
 </div>
@@ -9,7 +9,7 @@
 <div align="center">
   <a
     alt="Epic Web logo with the words Deployed Version"
-    href="https://e2e-react-application-testing-with-playwright.epicweb.dev/"
+    href="https://react-e2e.epicweb.dev/"
   >
     <img
       width="300px"
